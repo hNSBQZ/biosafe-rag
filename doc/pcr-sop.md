@@ -1,0 +1,97 @@
+德泰生物DETAIBIO
+活性蛋白整体方案Active Protein Solutions
+# PCR 标准操作流程
+本文介绍了 PCR 的详细操作流程，强调了实验中的注意事项，列举了常用缓冲液的配方。帮助我们在理解实验的基础上更顺利的操作。
+聚合酶链式反应（Polymerase Chain Reaction，PCR）是体外合成双链 DNA 的一种方法，其原理类似于天然 DNA的复制过程，其特异性主要依赖于与其目的片段两端互补的特异引物和高特异性的酶（热启动酶） 。典型的 PCR反应有三个步骤：变性，退火，延伸，经过多次循环反应，获得目的片段。
+# 一．试剂准备
+1. DNA 模板
+2. 特异性引物
+3. dNTP Mix 
+4. PCR buffer 
+5. 热启动酶
+# 二．操作步骤
+# 1.配置反应体系
+将各成分依次加入到 $0 . 5 \mathsf { m l }$ 的离心管中
+<table><tr><td>试剂</td><td>终浓度</td></tr><tr><td>buffer</td><td>1x</td></tr><tr><td>dNTPs</td><td>&lt;0.4mM</td></tr><tr><td>Forward primer</td><td>&lt;0.4uM</td></tr><tr><td>Reverse primer</td><td>&lt;0.4uM</td></tr><tr><td>Template DNA</td><td>&lt;100ng</td></tr><tr><td>热启动酶</td><td>5U</td></tr><tr><td>ddH2O</td><td>Up to 50 ul</td></tr></table>
+扩增使用热启动酶，可在常温下操作，非热启动型的酶要在低温配置反应体系。
+Tel: （025） 5889- 4959 
+www.DetaiBio.com 
+Sales@DetaiBio.com 
+德泰生物
+DETAIBIO 
+活性蛋白整体方案
+Active Protein Solutions 
+2.按照试剂盒说明书设置反应时间和温度，扩增结束后电泳鉴定
+3.琼脂糖核酸电泳
+将电泳所用器具蒸馏水洗净，架好梳子
+ 根据要分离的 DNA 片段大小制备合适浓度的琼脂糖凝胶，准确称取一定的琼脂糖加入到锥形瓶中，加入30ml 左右的电泳缓冲液（TAE 或 TBE）
+ 在微波炉中加热融化后冷却至 $4 0 \%$ 左右，充分混匀后倒入电泳槽中
+ 室温下凝固 40 分钟左右，小心拔出梳子，将凝胶放置电泳槽中准备点样
+ 在电泳槽中加入电泳缓冲液，漫过凝胶表面即可，点样孔内不要有气泡
+ 样品点样前准备好，（在八连管中）加入 5ul 样品，1ul 的 6xLoding buffer 和 1ul 的染料混合，用抢将混合后的样品缓缓注入到点样孔中，注意不要串孔
+ 按照正负极（红正黑负），接通电源，电压 40-60V，时间 30-40min，可根据溴酚蓝的位置判断是否终止电泳
+ 电泳结束，关闭电源，凝胶成像观察，并对比 marker 确定片段大小
+不同的琼脂糖浓度分离不同大小的 DNA 片段：
+<table><tr><td>琼脂糖的浓度/%</td><td>0.3</td><td>0.5</td><td>0.7</td><td>1.0</td><td>1.2</td><td>1.5</td><td>2.0</td></tr><tr><td>DNA大小/kb</td><td>5-60</td><td>1-30</td><td>0.8-12</td><td>0.5-10</td><td>0.4-7</td><td>0.2-3</td><td>0.05-2</td></tr></table>
+# 三．注意事项
+# 引物
+引物是决定 PCR 反应成败的关键，要保证扩增的准确、高效，引物的设计要遵循如下原则：
+1. 引物的设计在 cDNA 的保守区域，在 NCBI 上搜索不同物种的同一基因，通过序列分析的软件，得到不同基因相同的序列就是该基因的保守区
+2. 引物的长度：15-28bp，长度大于 38bp，会使退火温度升高，不利于普通 Taq酶的扩增
+3. 引物 GC 含量在 $4 0 \% - 6 0 \%$ ，Tm值最好接近 $7 2 \%$ 
+4. 因密码子的简并性，引物的 $3 ^ { \prime }$ ’端最好避开密码子的第三位（最好为 T）
+Tel: （025） 5889- 4959 
+www.DetaiBio.com 
+Sales@DetaiBio.com 
+德泰生物DETAIBIO
+活性蛋白整体方案Active Protein Solutions
+5. 碱基分布错落有致，3’端不超过 3 个连续 G 或 C
+6. 引物自身不要形成发夹结构，引物设计完成，要 BLAST 验证
+# 模板
+PCR 扩增对模板的要求不高，单链、双链 DNA 均可作为扩增片段，虽然 PCR 能够扩增微量的 DNA，为了保证扩增的特异性，对不同来源的模板，起始浓度有一定要求，如下：
+<table><tr><td>模板</td><td>加入量</td></tr><tr><td>λDNA</td><td>100pg-100ng</td></tr><tr><td>质粒 DNA</td><td>100pg-10ng</td></tr><tr><td>大肠杆菌基因组 DNA</td><td>100pg-100ng</td></tr><tr><td>人类基因组 DNA</td><td>10-200ng</td></tr></table>
+模板可以是纯化后的样品也可以是粗制品，不同来源的模板采取不同的处理方法，实验模板的纯化越简单越好，但模板中如果含有任何的 Taq 酶抑制剂、蛋白酶、核酸酶等，会干扰反应。模板提取注意保存，不能放置太久，避免反复冻融并防止降解。多数人会忽略这一问题，当实验结果没有任何条带时，可优先考虑是否为模板降解的原因。
+# 举例：细菌DNA的提取方法
+1. 取 1-2ml 的菌液，12000rpm 离心 10min，去除上清，得到沉淀
+2. 根据得到沉淀量，加入 500ul 左右的 TE（配方如下）悬浮沉淀，并加入 20ul 的溶菌酶，37 度保温 30min
+3. 加入 30ul 10%的 SDS 和 1mg 蛋白酶 K，混匀后 37 度保温 1h
+4. 加入 120ul 5mol/l 氯化钠，充分混匀，65 度放置 10min
+5. 等体积的酚：氯仿：异戊醇（25:24:1）充分混匀，12000rpm 离心 5min，得上清于干净的 EP 管中
+6. 等体积的氯仿：异戊醇（24:1）充分混匀，12000rpm 离心 5min，得到上清于赶紧 EP 管中
+7. 加入等体积的异戊醇，充分混匀， $\scriptscriptstyle - 2 0 ^ { \circ } \mathsf { C }$ 放置 30min 后 10000rpm 离心 5min
+8. 去除上清，得到 DNA 沉淀用 $70 \%$ 的乙醇漂洗（动作轻柔，不要讲沉淀冲起），吸干，通常可获得 3-5ug 的DNA
+# 其他
+1. Taq DNA 聚合酶：Taq 酶种类有很多，热启动酶，高保真酶，根据各自实验的应用选择合适的酶扩增，一般
+Tel: （025） 5889- 4959 
+www.DetaiBio.com 
+Sales@DetaiBio.com 
+德泰生物DETAIBIO
+活性蛋白整体方案
+Active Protein Solutions 
+的反应，化学修饰的热启动酶即能很好的完成，化学修饰热启动酶能够避免低温下任何非特异性产物产生。酶的浓度对扩增有一定影响，酶用量过多，会导致非特异性产物，操作按照说明书即可。
+2. dNTP：四种 dNTP 的浓度要相同，其中任何一种浓度偏高或偏低，都会引发碱基的错误渗入。此外，dNTP能够和体系中镁离子结合，从而影响体系中镁离子的浓度。
+3. 缓冲液：缓冲液一般随酶提供，一般的 PCR 试剂盒包括 Taq 酶，缓冲液，dNTP，水。初次扩增，可以完全按照试剂盒的说明书操作，如果扩增结果有问题，可自己尝试摸索实验条件或重新设计引物提取模板扩增。
+4. 因空气中和手上有一定污染源，操作过程中要戴手套，在干净的环境中配置反应体系，防止空气中的污染源。
+5. PCR 扩增的水要经过高压灭菌或 0.2um 滤膜过滤。
+6. 产物切胶回收二次扩增前，要先鉴定，二次扩增模板稀释 1000 倍。
+# 四．常用试剂配方
+# 电泳缓冲液
+1. 50xTAE（pH8.5） 
+准确称取 Tris 242g，EDTA（Na）37.2g 于 1L 烧杯中，加入 800ml 去离子水，搅拌溶解，接入 57.1ml 乙酸，充分搅拌，调 pH 值 8.5 后定容至 1L，室温保存。每次使用时稀释即可。
+2. 10xTBE（pH8.3） 
+准确称取 Tris 108g，EDTA 7.44g 硼酸 55g 于 1L 的烧杯中，加 800ml 去离子水，充分搅拌溶解，调 pH8.3 后定容至 1L，室温保存。每次使用前稀释即可。
+# 上样缓冲液
+6xLoding buffer 
+$0 . 2 5 \%$ 二甲苯青， $0 . 2 5 \%$ 溴酚蓝， $30 \%$ 甘油溶于双蒸水中， $4 ^ { \circ } \mathsf { C }$ 保存。
+Tel: （025） 5889- 4959 
+www.DetaiBio.com 
+Sales@DetaiBio.com 
+# 德泰生物产品推荐
+
+标签抗体
+
+<table><tr><td>货号</td><td>产品名称</td><td>浓度</td><td>规格</td></tr><tr><td rowspan="5">DTH01</td><td rowspan="5">HIS标签抗体</td><td rowspan="5">0.5mg/mL;1mg/mL</td><td>100μg</td></tr><tr><td>500μg</td></tr><tr><td>1mg</td></tr><tr><td>5mg</td></tr><tr><td>10mg</td></tr><tr><td rowspan="5">DTF01</td><td rowspan="5">Flag标签抗体</td><td rowspan="5">0.5mg/mL;1mg/mL</td><td>100μg</td></tr><tr><td>500μg</td></tr><tr><td>1mg</td></tr><tr><td>5mg</td></tr><tr><td>10mg</td></tr><tr><td rowspan="5">DTG01</td><td rowspan="5">GST标签抗体</td><td rowspan="5">0.5mg/mL;1mg/mL</td><td>100μg</td></tr><tr><td>500μg</td></tr><tr><td>1mg</td></tr><tr><td>5mg</td></tr><tr><td>10mg</td></tr><tr><td rowspan="5">DTM01</td><td rowspan="5">MYC标签抗体</td><td rowspan="5">0.5mg/mL;1mg/mL</td><td>100μg</td></tr><tr><td>500μg</td></tr><tr><td>1mg</td></tr><tr><td>5mg</td></tr><tr><td>10mg</td></tr></table>
+
+试剂盒
+
+<table><tr><td>货号</td><td>产品名称</td><td>组成</td><td>规格</td></tr><tr><td rowspan="2">DTT01</td><td rowspan="2">His标签蛋白快速检测试剂盒</td><td>His标签蛋白快速检测试纸条</td><td>10条</td></tr><tr><td>样本稀释液</td><td>10mL</td></tr></table>
