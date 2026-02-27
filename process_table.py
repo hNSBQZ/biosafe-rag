@@ -367,48 +367,32 @@ def parse_tables_from_text(text: str) -> list[dict[str, Any]]:
     return tables_out
 
 
-def extract_tables_to_json(md_path: Path, out_dir: Path) -> dict[str, Any]:
+def extract_tables_from_file(md_path: str | Path) -> list[dict[str, Any]]:
+    """读取 Markdown 文件, 仅提取其中所有 HTML 表格并返回结构化 JSON 数据.
+
+    返回值与 parse_tables_from_text 相同, 但去掉了内部字段 start_char.
+    """
+    md_path = Path(md_path)
     text = md_path.read_text(encoding="utf-8")
     tables_out = parse_tables_from_text(text)
+    return [{k: v for k, v in t.items() if k != "start_char"} for t in tables_out]
 
-    # Build raw per-tr rows for diagnostics
-    table_matches = list(_TABLE_RE.finditer(text))
-    raw_rows: list[dict[str, Any]] = []
-    for table_index, match in enumerate(table_matches, start=1):
-        parsed_rows = _parse_table_rows(match.group(0))
-        for row_index, row_cells in enumerate(parsed_rows, start=1):
-            raw_rows.append(
-                {
-                    "table_index": table_index,
-                    "row_index": row_index,
-                    "cells": [c.text for c in row_cells],
-                }
-            )
 
-    # Strip internal field before writing
-    clean_tables = [{k: v for k, v in t.items() if k != "start_char"} for t in tables_out]
+def dump_debug_json(data: Any, out_path: str | Path, *, indent: int = 2) -> Path:
+    """将任意可序列化数据写入 JSON 文件, 用于调试.
 
-    out_dir.mkdir(parents=True, exist_ok=True)
-    (out_dir / "mulu_raw_tr_rows.json").write_text(
-        json.dumps(raw_rows, ensure_ascii=False, indent=2), encoding="utf-8"
+    自动创建父目录, 返回写入的文件路径.
+    """
+    out_path = Path(out_path)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(
+        json.dumps(data, ensure_ascii=False, indent=indent), encoding="utf-8"
     )
-    (out_dir / "mulu_tables_records.json").write_text(
-        json.dumps(clean_tables, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
-
-    total_tr = sum(len(_parse_table_rows(m.group(0))) for m in table_matches)
-    total_records = sum(t["record_count"] for t in tables_out)
-
-    return {
-        "tables": len(table_matches),
-        "total_tr_rows": total_tr,
-        "total_records": total_records,
-        "out_dir": str(out_dir),
-    }
+    return out_path
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Extract HTML tables in 名录.md into JSON.")
+    parser = argparse.ArgumentParser(description="Extract HTML tables from Markdown into JSON.")
     parser.add_argument(
         "--input",
         default="名录.md",
@@ -416,19 +400,21 @@ def main() -> None:
     )
     parser.add_argument(
         "--out",
-        default="out",
-        help="Output directory (default: ./out)",
+        default="out/tables_debug.json",
+        help="Output JSON file path (default: out/tables_debug.json)",
     )
     args = parser.parse_args()
 
     md_path = Path(args.input)
-    out_dir = Path(args.out)
-
     if not md_path.exists():
         raise SystemExit(f"Input file not found: {md_path}")
 
-    summary = extract_tables_to_json(md_path=md_path, out_dir=out_dir)
-    print(json.dumps(summary, ensure_ascii=False, indent=2))
+    tables = extract_tables_from_file(md_path)
+    out = dump_debug_json(tables, args.out)
+
+    total_records = sum(t["record_count"] for t in tables)
+    print(f"提取完成: {len(tables)} 个表格, {total_records} 条记录")
+    print(f"JSON 已写入: {out}")
 
 
 if __name__ == "__main__":
