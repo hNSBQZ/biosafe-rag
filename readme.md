@@ -642,12 +642,12 @@ $$
 取得分最高的角色为候选，置信度定义为 Top-1 与 Top-2 得分之差：
 
 $$
-r^*=\arg\max_{r\in\mathcal{R}} S(r;\, t,\, h),
+r^{*}=\arg\max_{r\in\mathcal{R}} S(r;\, t,\, h),
 $$
 
 $$
 \mathrm{conf}(t,\, h)
-= S(r^*;\, t,\, h) - \max_{r\in\mathcal{R},\, r\ne r^*} S(r;\, t,\, h).
+= S(r^{*};\, t,\, h) - \max_{r\in\mathcal{R},\, r\ne r^{*}} S(r;\, t,\, h).
 $$
 
 当 $\mathrm{conf}(t, h)\ge \theta$（默认 $\theta=3$）时直接采信规则结果；否则交由 LLM 批量打标。
