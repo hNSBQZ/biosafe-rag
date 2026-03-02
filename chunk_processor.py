@@ -8,13 +8,14 @@ Chunk 后处理器
 设计参考：XR语音助手意图路由与RAG架构方案.md §七
 """
 
+import json
 import logging
 import re
 from dataclasses import dataclass, field
-from typing import List, Dict, Tuple, Optional
+from typing import List, Dict, Tuple, Optional, Union
 
-from config import AppConfig
-from llm_client import LLMClient
+from config import AppConfig, load_config
+from llm_client import LLMClient, BatchTagClient
 from split_chunk import Block, Chunk
 
 logger = logging.getLogger(__name__)
@@ -261,8 +262,9 @@ class ChunkProcessor:
 
     Parameters
     ----------
-    tag_client : LLMClient or None
+    tag_client : LLMClient / BatchTagClient or None
         用于低置信度 chunk 的 LLM 打标。为 None 时仅用规则打标。
+        推荐使用 BatchTagClient 以降低成本。
     emb_client : LLMClient or None
         用于 embedding 生成（当前预留）。
     config : AppConfig
@@ -272,7 +274,7 @@ class ChunkProcessor:
     def __init__(
         self,
         config: AppConfig,
-        tag_client: Optional[LLMClient] = None,
+        tag_client: Optional[Union[LLMClient, BatchTagClient]] = None,
         emb_client: Optional[LLMClient] = None,
     ):
         self.config = config
@@ -529,3 +531,185 @@ def score_role(text: str, heading_path: str, source_file: str = "") -> Dict[str,
             scores[role] += bonus
 
     return scores
+
+
+# ==================================================================
+#  测试入口
+# ==================================================================
+
+def _load_blocks_from_json(path: str) -> List[Block]:
+    """从 chunks_output.json 反序列化为 Block/Chunk 对象列表"""
+    with open(path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    blocks: List[Block] = []
+    for item in data:
+        chunks = [
+            Chunk(
+                title=c["title"],
+                content=c["content"],
+                start_line=c["start_line"],
+                end_line=c["end_line"],
+                heading_level=c["heading_level"],
+                token_estimate=c.get("token_estimate", 0),
+            )
+            for c in item.get("chunks", [])
+        ]
+        blocks.append(Block(
+            title=item["title"],
+            chunks=chunks,
+            start_line=item.get("start_line", 0),
+            end_line=item.get("end_line", 0),
+            heading_level=item.get("heading_level", 0),
+            source_file=item.get("source_file", ""),
+            breadcrumb=item.get("breadcrumb", []),
+        ))
+    return blocks
+
+
+def main():
+    import time as _time
+
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    )
+
+    t_start = _time.time()
+
+    # ── 1. 加载配置 ──
+    config = load_config()
+    logger.debug("配置加载完成: threshold=%d, roles=%s",
+                 config.role_confidence_threshold, config.roles)
+    logger.debug("Batch 配置: poll_interval=%d, max_wait=%d, endpoint=%s",
+                 config.batch.poll_interval, config.batch.max_wait,
+                 config.batch.endpoint)
+
+    # ── 2. 初始化客户端 ──
+    tag_client = None
+    if "tagging" in config.llm_profiles:
+        profile = config.llm_profiles["tagging"]
+        tag_client = BatchTagClient(profile, config.batch)
+        logger.info("打标 LLM (Batch API): model=%s, base_url=%s",
+                     profile.model, profile.base_url)
+    else:
+        logger.warning("未配置 tagging LLM profile，仅使用关键词规则打标")
+
+    processor = ChunkProcessor(config=config, tag_client=tag_client)
+
+    # ── 3. 加载数据 ──
+    input_path = "chunks_output.json"
+    output_path = "role_result.json"
+
+    logger.info("加载分块数据: %s", input_path)
+    blocks = _load_blocks_from_json(input_path)
+    total_chunks = sum(len(b.chunks) for b in blocks)
+    logger.info("共 %d Blocks, %d Chunks", len(blocks), total_chunks)
+
+    for b_idx, block in enumerate(blocks):
+        logger.debug("  Block[%d] source=%s title='%s' breadcrumb=%s chunks=%d",
+                      b_idx, block.source_file, block.title,
+                      block.breadcrumb, len(block.chunks))
+
+    # ── 4. 关键词规则打分（逐条详细输出） ──
+    threshold = config.role_confidence_threshold
+    tagged: List[TaggedChunk] = []
+    low_confidence: List[Tuple[int, TaggedChunk]] = []
+
+    chunk_global_idx = 0
+    t_rule_start = _time.time()
+
+    for b_idx, block in enumerate(blocks):
+        block_id = f"{block.source_file}_block{b_idx}"
+        heading_path = " > ".join(block.breadcrumb)
+
+        for c_idx, chunk in enumerate(block.chunks):
+            chunk_id = f"{block_id}_chunk{c_idx}"
+            body_text = processor._strip_heading_prefix(chunk.content)
+            role, confidence = processor.score_role(
+                body_text, heading_path, block.source_file
+            )
+
+            tc = TaggedChunk(
+                chunk_id=chunk_id,
+                content=chunk.content,
+                role=role,
+                role_confidence=confidence,
+                block_id=block_id,
+                source_file=block.source_file,
+                breadcrumb=list(block.breadcrumb),
+                heading_path=heading_path,
+                start_line=chunk.start_line,
+                end_line=chunk.end_line,
+                token_estimate=chunk.token_estimate,
+                tagged_by="rule",
+            )
+
+            is_low = confidence < threshold
+            status = "→ LLM" if is_low else "✓ 确定"
+            logger.debug(
+                "  [%03d] %s | role=%-12s conf=%2d %s | '%s'",
+                chunk_global_idx, chunk_id, role, confidence, status,
+                body_text[:60].replace('\n', ' '),
+            )
+
+            if is_low:
+                low_confidence.append((chunk_global_idx, tc))
+            tagged.append(tc)
+            chunk_global_idx += 1
+
+    t_rule_end = _time.time()
+    rule_decided = len(tagged) - len(low_confidence)
+    logger.info("规则打分完成: %.2fs | 规则确定 %d, 低置信度待 LLM %d",
+                t_rule_end - t_rule_start, rule_decided, len(low_confidence))
+
+    # ── 5. LLM 批量打标 ──
+    if low_confidence and tag_client:
+        logger.info("开始 LLM Batch 打标 (%d 条)...", len(low_confidence))
+        t_llm_start = _time.time()
+        processor._tag_low_confidence(low_confidence, tagged)
+        t_llm_end = _time.time()
+        logger.info("LLM 打标完成: %.2fs", t_llm_end - t_llm_start)
+
+        for _, tc in low_confidence:
+            logger.debug(
+                "  LLM 结果: %s | role=%-12s tagged_by=%s | '%s'",
+                tc.chunk_id, tc.role, tc.tagged_by,
+                tc.content[:60].replace('\n', ' '),
+            )
+    elif low_confidence:
+        logger.warning("有 %d 条低置信度 chunk 但无 tag_client，跳过 LLM 打标",
+                        len(low_confidence))
+
+    # ── 6. 汇总统计 ──
+    rule_count = sum(1 for t in tagged if t.tagged_by == "rule")
+    llm_count = sum(1 for t in tagged if t.tagged_by == "llm")
+    logger.info("打标汇总: 总计 %d | 规则 %d | LLM %d",
+                len(tagged), rule_count, llm_count)
+
+    # ── 7. 导出 ──
+    records = processor.to_milvus_records(tagged)
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(records, f, ensure_ascii=False, indent=2)
+
+    t_end = _time.time()
+    logger.info("结果已写入: %s (%d 条)", output_path, len(records))
+    logger.info("总耗时: %.2fs", t_end - t_start)
+
+    # ── 8. 打印摘要 ──
+    role_dist: Dict[str, int] = {}
+    for tc in tagged:
+        role_dist[tc.role] = role_dist.get(tc.role, 0) + 1
+
+    print(f"\n{'=' * 60}")
+    print(f"打标完成: {len(tagged)} chunks (规则: {rule_count}, LLM: {llm_count})")
+    print(f"总耗时: {t_end - t_start:.2f}s")
+    print(f"Role 分布:")
+    for role, count in sorted(role_dist.items(), key=lambda x: -x[1]):
+        bar = "█" * count
+        print(f"  {role:12s} {count:3d} {bar}")
+    print(f"结果: {output_path}")
+
+
+if __name__ == "__main__":
+    main()

@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 from config import load_config
-from llm_client import LLMClient
+from llm_client import LLMClient, BatchTagClient
 from chunk_processor import ChunkProcessor
 from split_chunk import process_file, format_display
 
@@ -32,8 +32,8 @@ def main():
     # ---- 初始化 LLM 客户端 ----
     tag_client = None
     if "tagging" in config.llm_profiles:
-        tag_client = LLMClient(config.llm_profiles["tagging"])
-        logger.info("打标 LLM: %s", tag_client)
+        tag_client = BatchTagClient(config.llm_profiles["tagging"], config.batch)
+        logger.info("打标 LLM (Batch API): %s", tag_client)
     else:
         logger.warning("未配置 tagging LLM profile，仅使用关键词规则打标")
 

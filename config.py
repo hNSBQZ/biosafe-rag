@@ -35,10 +35,19 @@ class MilvusConfig:
 
 
 @dataclass(frozen=True)
+class BatchConfig:
+    """Batch API 调用参数"""
+    poll_interval: int = 15
+    max_wait: int = 7200
+    endpoint: str = "/v1/chat/completions"
+
+
+@dataclass(frozen=True)
 class AppConfig:
     """应用全局配置"""
     llm_profiles: Dict[str, LLMProfile] = field(default_factory=dict)
     milvus: MilvusConfig = field(default_factory=MilvusConfig)
+    batch: BatchConfig = field(default_factory=BatchConfig)
 
     role_confidence_threshold: int = 3
     roles: Tuple[str, ...] = (
@@ -121,10 +130,17 @@ def load_config(env_path: str = ".env") -> AppConfig:
         embedding_dim=int(env.get("MILVUS_EMBEDDING_DIM", "1024")),
     )
 
+    batch = BatchConfig(
+        poll_interval=int(env.get("BATCH_POLL_INTERVAL", "15")),
+        max_wait=int(env.get("BATCH_MAX_WAIT", "7200")),
+        endpoint=env.get("BATCH_ENDPOINT", "/v1/chat/completions"),
+    )
+
     prompts = dict(DEFAULT_PROMPTS)
 
     return AppConfig(
         llm_profiles=profiles,
         milvus=milvus,
+        batch=batch,
         prompts=prompts,
     )
