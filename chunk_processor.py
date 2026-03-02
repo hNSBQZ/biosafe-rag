@@ -25,76 +25,119 @@ logger = logging.getLogger(__name__)
 # ==================================================================
 
 # 每个 role 的关键词及其权重
-# 权重含义：出现一次加多少分。面包屑/标题命中用 _HEADING_KEYWORDS 额外加分。
+# ──────────────────────────────────────────────────────────────
+# 设计原则：
+#   关键词应反映文档的 **角色/格式**，而非领域主题。
+#   例如 SOP 应靠"步骤、流程、操作规程"等程序性标志词识别，
+#   而不是靠"PCR、离心、电泳"等特定实验术语——后者只说明主题，
+#   一篇讲 PCR 原理的 knowledge 文章同样会包含这些词。
+#   领域特定的实验/设备名词不应出现在此处，否则：
+#     1. 会造成跨 role 误判（假阳性）
+#     2. 对未覆盖领域的 SOP 失效（假阴性）
+#
+#   另：结构性特征（编号列表、步骤格式等）通过 _score_structure()
+#   额外加分，不依赖关键词。
+# ──────────────────────────────────────────────────────────────
 ROLE_KEYWORDS: Dict[str, List[Tuple[str, int]]] = {
     "sop": [
-        ("操作步骤", 3), ("操作流程", 3), ("标准操作", 3), ("操作规程", 3),
+        # -- 文档类型直接标识 --
+        ("标准操作规程", 4), ("操作规程", 3), ("标准操作", 3),
         ("SOP", 3), ("sop", 3),
-        ("实验步骤", 2), ("实验流程", 2), ("操作方法", 2), ("操作要点", 2),
-        ("配置反应", 2), ("反应体系", 2),
-        ("加入", 1), ("移液", 1), ("离心", 2), ("电泳", 2),
-        ("取样", 1), ("混匀", 1), ("震荡", 1), ("孵育", 1), ("培养", 1),
-        ("扩增", 2), ("提取", 1), ("灭菌", 1), ("接种", 1),
-        ("PCR", 2), ("核酸提取", 2), ("琼脂糖", 1),
-        ("按照以下步骤", 2), ("依次", 1), ("先后顺序", 2),
+        ("操作步骤", 3), ("操作流程", 3), ("操作方法", 2),
+        ("实验步骤", 2), ("实验流程", 2), ("实验方法", 2),
+        # -- 通用程序性结构词（体现"按步骤执行"） --
+        ("按照以下步骤", 3), ("依次", 1), ("先后顺序", 2),
+        ("然后", 1), ("接着", 1), ("随后", 1), ("完成后", 2),
+        ("第一步", 2), ("第二步", 2), ("第三步", 2),
+        ("准备工作", 2), ("操作要点", 2), ("操作要求", 2),
+        ("注意事项", 1),
+        # -- SOP 文档通用章节名 --
+        ("目的与范围", 2), ("适用范围", 1), ("职责", 1),
+        ("记录表", 2), ("记录表格", 2),
+        # -- 通用操作动词（跨领域适用） --
+        ("记录", 1), ("检查", 1), ("确认", 1),
+        ("清洁", 1), ("消毒", 1), ("处理", 1),
     ],
     "emergency": [
-        ("应急", 4), ("预案", 3), ("应急预案", 5),
+        # -- 核心标识 --
+        ("应急预案", 5), ("应急", 4), ("预案", 3),
+        ("应急处置", 4), ("应急响应", 3),
+        ("生物安全事故", 4),
+        # -- 事故/危害场景 --
         ("泄漏", 3), ("溢洒", 3), ("暴露", 3),
         ("事故", 3), ("紧急", 3), ("处置", 2),
+        ("职业暴露", 3), ("意外暴露", 3),
+        # -- 应对措施 --
         ("感染", 2), ("伤害", 2), ("急救", 3),
         ("报告", 1), ("警报", 2), ("疏散", 3),
-        ("消毒处理", 2), ("生物安全事故", 4),
-        ("应急处置", 4), ("应急响应", 3),
-        ("职业暴露", 3), ("意外暴露", 3),
+        ("消毒处理", 2),
     ],
     "regulation": [
-        ("法规", 3), ("制度", 2), ("管理办法", 3), ("条例", 3),
-        ("规定", 2), ("合规", 2), ("要求", 1),
-        ("审批", 2), ("许可", 2), ("资质", 2),
-        ("禁止", 2), ("应当", 1), ("必须", 1), ("不得", 2),
+        # -- 法规/制度类型标识 --
+        ("法规", 3), ("条例", 3), ("管理办法", 3),
         ("管理制度", 3), ("管理规定", 3),
-        ("生物安全法", 4), ("病原微生物实验室", 2),
+        ("制度", 2), ("规定", 2), ("合规", 2),
+        ("生物安全法", 4), ("合规要求", 3),
+        # -- 强制性/规范性语气词 --
+        ("禁止", 2), ("不得", 2), ("应当", 1), ("必须", 1), ("要求", 1),
+        # -- 行政流程 --
+        ("审批", 2), ("许可", 2), ("资质", 2),
+        ("备案", 2), ("报批", 2), ("监督管理", 2),
         ("安全管理", 2), ("实验室管理", 2),
-        ("合规要求", 3), ("监督管理", 2),
-        ("备案", 2), ("报批", 2),
+        ("病原微生物实验室", 2),
     ],
     "directory": [
+        # -- 核心标识 --
         ("名录", 5), ("清单", 3), ("目录", 3),
+        # -- 分类分级体系 --
         ("分类", 2), ("分级", 2),
-        ("病原微生物", 2), ("病原体", 2),
         ("第一类", 3), ("第二类", 3), ("第三类", 3), ("第四类", 3),
         ("高致病性", 3), ("人间传染", 2),
         ("BSL-1", 2), ("BSL-2", 2), ("BSL-3", 2), ("BSL-4", 2),
+        # -- 微生物相关（目录/名录的主要对象） --
+        ("病原微生物", 2), ("病原体", 2),
         ("菌种", 2), ("毒种", 2), ("毒株", 2),
     ],
     "knowledge": [
+        # -- 认知/解释性标识 --
         ("原理", 3), ("概念", 3), ("定义", 3),
+        ("术语", 3), ("术语和定义", 4),
         ("知识", 2), ("机制", 2), ("机理", 2),
         ("理论", 2), ("解释", 1),
+        # -- 说明/论述性语气词 --
         ("是什么", 2), ("为什么", 2), ("因为", 1), ("由于", 1),
-        ("基因", 1), ("蛋白", 1), ("细胞", 1), ("免疫", 1),
+        ("是指", 2), ("即", 1), ("称为", 2),
+        # -- 描述性属性词（跨领域通用） --
         ("结构", 1), ("功能", 1), ("特征", 1), ("特性", 1),
+        ("分类", 1), ("组成", 1), ("作用", 1),
     ],
     "equipment": [
+        # -- 核心标识 --
         ("设备", 3), ("仪器", 3),
+        # -- 设备管理动作（体现"设备角色"的通用词） --
         ("校准", 3), ("维护", 2), ("保养", 2),
-        ("故障", 3), ("维修", 2),
-        ("生物安全柜", 3), ("离心机", 2), ("PCR仪", 2),
-        ("高压灭菌器", 2), ("超净工作台", 2), ("恒温箱", 2),
+        ("故障", 3), ("维修", 2), ("巡检", 2),
         ("操作面板", 2), ("使用说明", 2),
+        ("设备管理", 3), ("仪器管理", 3),
+        ("开机", 2), ("关机", 2), ("运行参数", 2),
     ],
     "reagent": [
+        # -- 核心标识 --
         ("试剂", 3), ("药品", 2), ("化学品", 2),
-        ("MSDS", 4), ("安全数据表", 3),
-        ("保存", 1), ("存储", 1), ("储存", 1),
-        ("危害", 2), ("有毒", 2), ("腐蚀", 2), ("易燃", 2),
-        ("配方", 2), ("浓度", 1), ("稀释", 1),
-        ("buffer", 1), ("Buffer", 1), ("缓冲液", 1),
         ("试剂盒", 2), ("试剂准备", 2),
+        # -- 安全信息 --
+        ("MSDS", 4), ("SDS", 4), ("安全数据表", 3),
+        ("安全技术说明书", 3),
+        ("危害", 2), ("有毒", 2), ("腐蚀", 2), ("易燃", 2),
+        # -- 存储与使用 --
+        ("保存", 1), ("存储", 1), ("储存", 1),
+        ("配方", 2), ("浓度", 1), ("稀释", 1),
+        ("有效期", 2), ("保质期", 2),
     ],
     "notice": [
+        # -- 核心标识 --
         ("通知", 4), ("公告", 4),
+        # -- 行政/培训活动 --
         ("培训", 3), ("考核", 3),
         ("安排", 2), ("时间", 1), ("日期", 1),
         ("会议", 2), ("签到", 2), ("报名", 2),
@@ -131,16 +174,61 @@ HEADING_KEYWORDS: Dict[str, List[Tuple[str, int]]] = {
     ],
 }
 
-# 源文件名到 role 的强先验（文件名本身就是很强的信号）
-SOURCE_FILE_ROLE_HINT: Dict[str, Tuple[str, int]] = {
-    "pcr-sop": ("sop", 6),
-    "sop": ("sop", 6),
-    "应急预案": ("emergency", 6),
-    "应急": ("emergency", 5),
-    "名录": ("directory", 6),
-    "通用安全": ("regulation", 4),
-    "核酸": ("sop", 3),
-}
+# 源文件名先验已移除。
+# 原因：role 打标的粒度是 chunk 级，而一篇文档通常包含多种角色的内容
+# （如 通用安全.md 里同时有 knowledge/equipment/regulation 章节）。
+# 文件名级的统一加分会让同一文档内不同角色的 chunk 被错误偏置。
+# 章节级的信号已由 HEADING_KEYWORDS 覆盖，粒度更合适。
+
+
+# ==================================================================
+#  结构特征加分（不依赖领域关键词，靠文本格式判断 role）
+#  参考：文档分块与RAG检索策略设计说明.md §3 structure boosts
+# ==================================================================
+
+# 编号步骤模式：匹配 "1." "（1）" "(1)" "一、" "Step 1" "第一步" 等
+_STEP_PATTERN = re.compile(
+    r'(?:^|\n)\s*'
+    r'(?:'
+    r'\d+[.、)）]'              # 1. 2、 3) 4）
+    r'|[（(]\d+[)）]'           # （1） (2)
+    r'|[一二三四五六七八九十]+[、.]'  # 一、 二.
+    r'|第[一二三四五六七八九十\d]+步' # 第一步 第2步
+    r'|[Ss]tep\s*\d+'          # Step 1 step2
+    r')'
+)
+
+_DEFINITION_PATTERN = re.compile(
+    r'(?:^|\n)\s*'
+    r'(?:'
+    r'\d+\.\d+\s+\S'           # "2.1 气溶胶" 式术语条目
+    r'|术语|定义|含义|是指|即：|即,'
+    r')'
+)
+
+_REGULATION_TONE_WORDS = ("必须", "应当", "不得", "禁止", "严禁", "违反")
+
+
+def _score_structure(text: str) -> Dict[str, int]:
+    """根据文本的排版结构特征为各 role 加分，与领域无关"""
+    bonuses: Dict[str, int] = {}
+
+    step_matches = _STEP_PATTERN.findall(text)
+    if len(step_matches) >= 3:
+        bonuses["sop"] = bonuses.get("sop", 0) + 4
+    elif len(step_matches) >= 1:
+        bonuses["sop"] = bonuses.get("sop", 0) + 2
+
+    if _DEFINITION_PATTERN.search(text):
+        bonuses["knowledge"] = bonuses.get("knowledge", 0) + 3
+
+    tone_count = sum(text.count(w) for w in _REGULATION_TONE_WORDS)
+    if tone_count >= 3:
+        bonuses["regulation"] = bonuses.get("regulation", 0) + 3
+    elif tone_count >= 1:
+        bonuses["regulation"] = bonuses.get("regulation", 0) + 1
+
+    return bonuses
 
 
 # ==================================================================
@@ -192,6 +280,33 @@ class ChunkProcessor:
         self.emb_client = emb_client
 
     # ----------------------------------------------------------
+    #  辅助：去除 content 开头的面包屑 / 标题行
+    # ----------------------------------------------------------
+
+    @staticmethod
+    def _strip_heading_prefix(content: str) -> str:
+        """去除 content 开头的面包屑路径行和 markdown 标题行，只保留正文。
+
+        split_chunk 产出的 content 结构：
+          第 1 行  = 面包屑路径（如 "二．操作步骤 > 1.配置反应体系"）
+          后续若干 = 空行 / markdown 标题行（# ...）
+          之后     = 真正的正文
+        打分 / LLM 打标时应仅使用正文，避免路径中的关键词干扰。
+        """
+        lines = content.split('\n')
+        if len(lines) <= 1:
+            return content
+        start = 1                       # 跳过第 1 行（面包屑）
+        for i in range(1, len(lines)):
+            stripped = lines[i].strip()
+            if not stripped or re.match(r'^#{1,6}\s', stripped):
+                start = i + 1
+                continue
+            break
+        body = '\n'.join(lines[start:]).strip()
+        return body if body else content  # 全被剥离时回退到原文
+
+    # ----------------------------------------------------------
     #  主入口
     # ----------------------------------------------------------
 
@@ -215,8 +330,9 @@ class ChunkProcessor:
 
             for c_idx, chunk in enumerate(block.chunks):
                 chunk_id = f"{block_id}_chunk{c_idx}"
+                body_text = self._strip_heading_prefix(chunk.content)
                 role, confidence = self.score_role(
-                    chunk.content, heading_path, block.source_file
+                    body_text, heading_path, block.source_file
                 )
 
                 tc = TaggedChunk(
@@ -285,12 +401,10 @@ class ChunkProcessor:
                 if kw in heading_path:
                     scores[role] += weight * 2
 
-        if source_file:
-            stem = source_file.rsplit(".", 1)[0] if "." in source_file else source_file
-            for pattern, (role, bonus) in SOURCE_FILE_ROLE_HINT.items():
-                if pattern in stem:
-                    scores[role] += bonus
-                    break
+        # 结构特征加分（编号步骤→sop, 术语条目→knowledge 等）
+        for role, bonus in _score_structure(text).items():
+            if role in scores:
+                scores[role] += bonus
 
         ranked = sorted(scores.items(), key=lambda x: -x[1])
         top1_role, top1_score = ranked[0]
@@ -321,7 +435,8 @@ class ChunkProcessor:
 
         message_batches = []
         for _, tc in low_items:
-            content_preview = tc.content[:800]
+            body_text = self._strip_heading_prefix(tc.content)
+            content_preview = body_text[:800]
             prompt = prompt_template.format(
                 heading_path=tc.heading_path,
                 chunk_text=content_preview,
@@ -409,11 +524,8 @@ def score_role(text: str, heading_path: str, source_file: str = "") -> Dict[str,
             if kw in heading_path:
                 scores[role] += weight * 2
 
-    if source_file:
-        stem = source_file.rsplit(".", 1)[0] if "." in source_file else source_file
-        for pattern, (r, bonus) in SOURCE_FILE_ROLE_HINT.items():
-            if pattern in stem:
-                scores[r] += bonus
-                break
+    for role, bonus in _score_structure(text).items():
+        if role in scores:
+            scores[role] += bonus
 
     return scores

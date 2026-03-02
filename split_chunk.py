@@ -1113,18 +1113,22 @@ def blocks_to_dicts(blocks: List[Block]) -> List[dict]:
 
 if __name__ == '__main__':
     import io
+    from pathlib import Path
+
     # Windows 控制台默认 GBK, 强制 stdout/stderr 使用 UTF-8
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 
-    if len(sys.argv) > 1:
-        files = sys.argv[1:]
-    else:
-        files = sorted(glob.glob('*.md'))
+    SKIP_FILES: set = {
+        "catolog.md",
+    }
+
+    doc_dir = Path(__file__).parent / 'doc'
+    files = sorted(str(p) for p in doc_dir.glob('*.md')
+                   if p.name not in SKIP_FILES)
 
     if not files:
-        print("用法: python split_chunk.py [file1.md file2.md ...]")
-        print("  或将 .md 文件放在当前目录下直接运行")
+        print(f"doc 目录下无可处理的 .md 文件: {doc_dir}")
         sys.exit(1)
 
     all_blocks = []
@@ -1136,7 +1140,6 @@ if __name__ == '__main__':
         all_blocks.extend(blocks)
         print(format_display(blocks))
 
-    # 导出 JSON
     output_path = 'chunks_output.json'
     with open(output_path, 'w', encoding='utf-8') as fp:
         json.dump(blocks_to_dicts(all_blocks), fp, ensure_ascii=False, indent=2)
@@ -1144,4 +1147,5 @@ if __name__ == '__main__':
     total_chunks = sum(len(b.chunks) for b in all_blocks)
     print(f"\n{'=' * 70}")
     print(f"全部完成: {len(all_blocks)} Blocks, {total_chunks} Chunks")
+    print(f"已跳过: {SKIP_FILES or '无'}")
     print(f"JSON 已写入: {output_path}")
