@@ -27,11 +27,18 @@ class LLMProfile:
 
 @dataclass(frozen=True)
 class MilvusConfig:
-    """Milvus 连接与 Collection 配置"""
+    """Milvus 连接与 Collection 配置
+
+    uri 支持两种形式:
+      - 本地文件路径 (Milvus Lite): "./milvus_lite.db"
+      - 远程服务地址: "http://localhost:19530"
+    """
+    uri: str = "./milvus_lite.db"
     host: str = "localhost"
     port: int = 19530
     collection_name: str = "biosafe_chunks"
     embedding_dim: int = 1024
+    metric_type: str = "COSINE"
 
 
 @dataclass(frozen=True)
@@ -124,10 +131,12 @@ def load_config(env_path: str = ".env") -> AppConfig:
             )
 
     milvus = MilvusConfig(
+        uri=env.get("MILVUS_URI", "./milvus_lite.db"),
         host=env.get("MILVUS_HOST", "localhost"),
         port=int(env.get("MILVUS_PORT", "19530")),
         collection_name=env.get("MILVUS_COLLECTION", "biosafe_chunks"),
         embedding_dim=int(env.get("MILVUS_EMBEDDING_DIM", "1024")),
+        metric_type=env.get("MILVUS_METRIC_TYPE", "COSINE"),
     )
 
     batch = BatchConfig(

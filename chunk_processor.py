@@ -276,10 +276,12 @@ class ChunkProcessor:
         config: AppConfig,
         tag_client: Optional[Union[LLMClient, BatchTagClient]] = None,
         emb_client: Optional[LLMClient] = None,
+        use_llm: bool = True,
     ):
         self.config = config
         self.tag_client = tag_client
         self.emb_client = emb_client
+        self.use_llm = use_llm
 
     # ----------------------------------------------------------
     #  辅助：去除 content 开头的面包屑 / 标题行
@@ -360,8 +362,11 @@ class ChunkProcessor:
 
                 chunk_global_idx += 1
 
-        if low_confidence and self.tag_client:
+        if low_confidence and self.use_llm and self.tag_client:
             self._tag_low_confidence(low_confidence, tagged)
+        elif low_confidence and not self.use_llm:
+            logger.info("use_llm=False，跳过 %d 条低置信度 chunk 的 LLM 打标",
+                        len(low_confidence))
 
         rule_count = sum(1 for t in tagged if t.tagged_by == "rule")
         llm_count = sum(1 for t in tagged if t.tagged_by == "llm")
@@ -586,16 +591,18 @@ def main():
                  config.batch.endpoint)
 
     # ── 2. 初始化客户端 ──
+    use_llm = False
     tag_client = None
-    if "tagging" in config.llm_profiles:
+    if use_llm and "tagging" in config.llm_profiles:
         profile = config.llm_profiles["tagging"]
         tag_client = BatchTagClient(profile, config.batch)
         logger.info("打标 LLM (Batch API): model=%s, base_url=%s",
                      profile.model, profile.base_url)
     else:
-        logger.warning("未配置 tagging LLM profile，仅使用关键词规则打标")
+        logger.warning("仅使用关键词规则打标 (use_llm=%s, profile配置=%s)",
+                        use_llm, "tagging" in config.llm_profiles)
 
-    processor = ChunkProcessor(config=config, tag_client=tag_client)
+    processor = ChunkProcessor(config=config, tag_client=tag_client, use_llm=use_llm)
 
     # ── 3. 加载数据 ──
     input_path = "chunks_output.json"
@@ -664,12 +671,15 @@ def main():
                 t_rule_end - t_rule_start, rule_decided, len(low_confidence))
 
     # ── 5. LLM 批量打标 ──
-    if low_confidence and tag_client:
+    if low_confidence and use_llm and tag_client:
         logger.info("开始 LLM Batch 打标 (%d 条)...", len(low_confidence))
         t_llm_start = _time.time()
         processor._tag_low_confidence(low_confidence, tagged)
         t_llm_end = _time.time()
         logger.info("LLM 打标完成: %.2fs", t_llm_end - t_llm_start)
+    elif low_confidence and not use_llm:
+        logger.info("use_llm=False，跳过 %d 条低置信度 chunk 的 LLM 打标",
+                     len(low_confidence))
 
         for _, tc in low_confidence:
             logger.debug(
