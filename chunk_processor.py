@@ -15,7 +15,7 @@ from dataclasses import dataclass, field
 from typing import List, Dict, Tuple, Optional, Union
 
 from config import AppConfig, load_config
-from llm_client import LLMClient, BatchTagClient
+from llm_client import LLMClient, BatchTagClient, BatchEmbeddingClient
 from split_chunk import Block, Chunk
 
 logger = logging.getLogger(__name__)
@@ -275,7 +275,7 @@ class ChunkProcessor:
         self,
         config: AppConfig,
         tag_client: Optional[Union[LLMClient, BatchTagClient]] = None,
-        emb_client: Optional[LLMClient] = None,
+        emb_client: Optional[Union[LLMClient, BatchEmbeddingClient]] = None,
         use_llm: bool = True,
     ):
         self.config = config
@@ -481,15 +481,49 @@ class ChunkProcessor:
     #  转换为 Milvus 入库格式
     # ----------------------------------------------------------
 
-    def to_milvus_records(self, tagged_chunks: List[TaggedChunk]) -> List[Dict]:
+    def embed_chunks(
+        self, tagged_chunks: List[TaggedChunk],
+    ) -> List[List[float]]:
+        """批量生成 embedding 向量
+
+        支持 BatchEmbeddingClient（Batch API）和 LLMClient（同步）两种后端。
+        返回与 tagged_chunks 顺序一致的向量列表。
+        """
+        if not self.emb_client:
+            raise RuntimeError("未配置 emb_client，无法生成 embedding")
+
+        texts = [tc.content for tc in tagged_chunks]
+
+        if isinstance(self.emb_client, BatchEmbeddingClient):
+            logger.info("通过 Batch API 批量生成 embedding (%d 条)", len(texts))
+            return self.emb_client.batch_embed(texts)
+
+        logger.info("通过同步接口生成 embedding (%d 条)", len(texts))
+        return self.emb_client.get_embeddings(texts)
+
+    def to_milvus_records(
+        self,
+        tagged_chunks: List[TaggedChunk],
+        embeddings: Optional[List[List[float]]] = None,
+    ) -> List[Dict]:
         """将 TaggedChunk 列表转换为 Milvus 可插入的 dict 列表
 
-        注意：embedding 字段需要单独填充（调用 emb_client）。
-        当前版本不含 embedding，仅构造 metadata 部分。
+        Parameters
+        ----------
+        tagged_chunks : list of TaggedChunk
+        embeddings : list of vectors, optional
+            与 tagged_chunks 等长的 embedding 向量列表。
+            若提供则写入 "embedding" 字段；若为 None 则不包含该字段。
         """
+        if embeddings is not None and len(embeddings) != len(tagged_chunks):
+            raise ValueError(
+                f"embeddings 长度 ({len(embeddings)}) "
+                f"与 tagged_chunks 长度 ({len(tagged_chunks)}) 不一致"
+            )
+
         records = []
-        for tc in tagged_chunks:
-            records.append({
+        for i, tc in enumerate(tagged_chunks):
+            record = {
                 "chunk_id": tc.chunk_id,
                 "content": tc.content,
                 "role": tc.role,
@@ -502,8 +536,10 @@ class ChunkProcessor:
                 "end_line": tc.end_line,
                 "token_estimate": tc.token_estimate,
                 "tagged_by": tc.tagged_by,
-                # "embedding": [],  # TODO: 由 pipeline 调用 emb_client 填充
-            })
+            }
+            if embeddings is not None:
+                record["embedding"] = embeddings[i]
+            records.append(record)
         return records
 
 

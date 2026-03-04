@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 from config import load_config
-from llm_client import LLMClient, BatchTagClient
+from llm_client import LLMClient, BatchTagClient, BatchEmbeddingClient
 from chunk_processor import ChunkProcessor
 from split_chunk import process_file, format_display
 
@@ -39,8 +39,10 @@ def main():
 
     emb_client = None
     if "embedding" in config.llm_profiles:
-        emb_client = LLMClient(config.llm_profiles["embedding"])
-        logger.info("Embedding LLM: %s", emb_client)
+        emb_client = BatchEmbeddingClient(
+            config.llm_profiles["embedding"], config.batch,
+        )
+        logger.info("Embedding (Batch API): %s", emb_client)
 
     processor = ChunkProcessor(
         config=config,
@@ -80,23 +82,33 @@ def main():
         role_dist[tc.role] = role_dist.get(tc.role, 0) + 1
     logger.info("Role 分布: %s", json.dumps(role_dist, ensure_ascii=False))
 
-    # ---- Step 3: 导出 ----
-    records = processor.to_milvus_records(tagged_chunks)
+    # ---- Step 3: Embedding 生成 ----
+    embeddings = None
+    if emb_client:
+        logger.info("开始生成 Embedding (%d 条)...", len(tagged_chunks))
+        embeddings = processor.embed_chunks(tagged_chunks)
+        valid_count = sum(1 for e in embeddings if e)
+        logger.info("Embedding 完成: %d/%d 有效", valid_count, len(embeddings))
+    else:
+        logger.warning("未配置 embedding profile，跳过 Embedding 生成")
+
+    # ---- Step 4: 导出 ----
+    records = processor.to_milvus_records(tagged_chunks, embeddings=embeddings)
     output_path = "tagged_chunks.json"
     with open(output_path, "w", encoding="utf-8") as fp:
         json.dump(records, fp, ensure_ascii=False, indent=2)
-    logger.info("打标结果已写入: %s (%d 条)", output_path, len(records))
+    logger.info("结果已写入: %s (%d 条)", output_path, len(records))
 
     # ---- 打印摘要 ----
+    has_emb = embeddings is not None
     print(f"\n{'=' * 60}")
-    print(f"打标完成: {len(tagged_chunks)} chunks")
+    print(f"处理完成: {len(tagged_chunks)} chunks (embedding: {'✓' if has_emb else '✗'})")
     print(f"Role 分布:")
     for role, count in sorted(role_dist.items(), key=lambda x: -x[1]):
         bar = "█" * count
         print(f"  {role:12s} {count:3d} {bar}")
     print(f"结果: {output_path}")
 
-    # TODO: Step 4 — embedding 生成
     # TODO: Step 5 — Milvus 入库
 
 
