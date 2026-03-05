@@ -39,6 +39,13 @@ class MilvusConfig:
     collection_name: str = "biosafe_chunks"
     embedding_dim: int = 1024
     metric_type: str = "COSINE"
+    token: str = ""
+    enable_bm25: bool = False
+    bm25_input_field: str = "content"
+    bm25_output_field: str = "sparse"
+    bm25_index_algo: str = "DAAT_MAXSCORE"
+    bm25_k1: float = 1.2
+    bm25_b: float = 0.75
 
 
 @dataclass(frozen=True)
@@ -115,6 +122,11 @@ def load_config(env_path: str = ".env") -> AppConfig:
 
     缺省的 profile 会被跳过（不报错），使用时再检查。
     """
+    def _as_bool(v: str, default: bool = False) -> bool:
+        if v is None:
+            return default
+        return str(v).strip().lower() in {"1", "true", "yes", "y", "on"}
+
     env = _load_env(env_path)
 
     profiles: Dict[str, LLMProfile] = {}
@@ -137,6 +149,13 @@ def load_config(env_path: str = ".env") -> AppConfig:
         collection_name=env.get("MILVUS_COLLECTION", "biosafe_chunks"),
         embedding_dim=int(env.get("MILVUS_EMBEDDING_DIM", "1024")),
         metric_type=env.get("MILVUS_METRIC_TYPE", "COSINE"),
+        token=env.get("MILVUS_TOKEN", ""),
+        enable_bm25=_as_bool(env.get("MILVUS_ENABLE_BM25", "false")),
+        bm25_input_field=env.get("MILVUS_BM25_INPUT_FIELD", "content"),
+        bm25_output_field=env.get("MILVUS_BM25_OUTPUT_FIELD", "sparse"),
+        bm25_index_algo=env.get("MILVUS_BM25_INDEX_ALGO", "DAAT_MAXSCORE"),
+        bm25_k1=float(env.get("MILVUS_BM25_K1", "1.2")),
+        bm25_b=float(env.get("MILVUS_BM25_B", "0.75")),
     )
 
     batch = BatchConfig(

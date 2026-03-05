@@ -11,6 +11,12 @@ from typing import List, Dict, Optional
 
 from pymilvus import MilvusClient, DataType
 
+try:
+    from pymilvus import Function, FunctionType
+except ImportError:  # 兼容不含 Function API 的旧版 pymilvus
+    Function = None
+    FunctionType = None
+
 from config import MilvusConfig
 
 logger = logging.getLogger(__name__)
@@ -52,7 +58,11 @@ class MilvusManager:
         else:
             logger.info("连接 Milvus 服务: %s", uri)
 
-        self._client = MilvusClient(uri=uri)
+        kwargs = {"uri": uri}
+        # 远端 Milvus 可选 token 鉴权
+        if uri.startswith("http") and self.config.token:
+            kwargs["token"] = self.config.token
+        self._client = MilvusClient(**kwargs)
         logger.info("Milvus 连接已建立")
 
     def disconnect(self) -> None:
@@ -87,12 +97,18 @@ class MilvusManager:
 
         schema.add_field("chunk_id", DataType.VARCHAR,
                          max_length=_SHORT_VARCHAR_MAX, is_primary=True)
-        schema.add_field("content", DataType.VARCHAR,
-                         max_length=_VARCHAR_MAX)
+        content_field_kwargs = {"max_length": _VARCHAR_MAX}
+        if self.config.enable_bm25:
+            content_field_kwargs["enable_analyzer"] = True
+        schema.add_field("content", DataType.VARCHAR, **content_field_kwargs)
         schema.add_field("role", DataType.VARCHAR,
                          max_length=64)
         schema.add_field("embedding", DataType.FLOAT_VECTOR,
                          dim=self.config.embedding_dim)
+        if self.config.enable_bm25:
+            schema.add_field(
+                self.config.bm25_output_field, DataType.SPARSE_FLOAT_VECTOR
+            )
 
         schema.add_field("source_file", DataType.VARCHAR,
                          max_length=_SHORT_VARCHAR_MAX)
@@ -107,12 +123,41 @@ class MilvusManager:
         schema.add_field("tagged_by", DataType.VARCHAR,
                          max_length=32)
 
+        if self.config.enable_bm25:
+            if self.config.bm25_input_field != "content":
+                raise ValueError(
+                    "当前实现仅支持 bm25_input_field='content'，"
+                    f"收到: {self.config.bm25_input_field}"
+                )
+            if Function is None or FunctionType is None:
+                raise RuntimeError(
+                    "当前 pymilvus 版本不支持 Function/BM25，请升级后再启用 BM25"
+                )
+            bm25_function = Function(
+                name="content_bm25_emb",
+                input_field_names=[self.config.bm25_input_field],
+                output_field_names=[self.config.bm25_output_field],
+                function_type=FunctionType.BM25,
+            )
+            schema.add_function(bm25_function)
+
         index_params = self.client.prepare_index_params()
         index_params.add_index(
             field_name="embedding",
             index_type="AUTOINDEX",
             metric_type=self.config.metric_type,
         )
+        if self.config.enable_bm25:
+            index_params.add_index(
+                field_name=self.config.bm25_output_field,
+                index_type="SPARSE_INVERTED_INDEX",
+                metric_type="BM25",
+                params={
+                    "inverted_index_algo": self.config.bm25_index_algo,
+                    "bm25_k1": self.config.bm25_k1,
+                    "bm25_b": self.config.bm25_b,
+                },
+            )
 
         self.client.create_collection(
             collection_name=name,
@@ -202,6 +247,7 @@ class MilvusManager:
                 "chunk_id", "content", "role", "source_file",
                 "heading_path", "role_confidence",
             ]
+        output_fields = self._sanitize_output_fields(output_fields)
 
         filter_expr = ""
         if role:
@@ -225,6 +271,52 @@ class MilvusManager:
         logger.info("检索完成: %d 个查询, top_k=%d, role=%s",
                      len(query_vectors), top_k, role or "ALL")
         return results
+
+    def search_bm25(
+        self,
+        query_texts: List[str],
+        role: Optional[str] = None,
+        top_k: int = 8,
+        output_fields: Optional[List[str]] = None,
+    ) -> List[List[Dict]]:
+        """BM25 稀疏检索（依赖 schema FunctionType.BM25）。"""
+        if not self.config.enable_bm25:
+            raise RuntimeError("未启用 BM25，请先设置 MILVUS_ENABLE_BM25=true")
+        if output_fields is None:
+            output_fields = [
+                "chunk_id", "content", "role", "source_file",
+                "heading_path", "role_confidence",
+            ]
+        output_fields = self._sanitize_output_fields(output_fields)
+
+        filter_expr = ""
+        if role:
+            filter_expr = f'role == "{role}"'
+
+        search_params = {
+            "metric_type": "BM25",
+            "params": {},
+        }
+        results = self.client.search(
+            collection_name=self.config.collection_name,
+            data=query_texts,
+            limit=top_k,
+            filter=filter_expr,
+            output_fields=output_fields,
+            search_params=search_params,
+            anns_field=self.config.bm25_output_field,
+        )
+        logger.info("BM25 检索完成: %d 个查询, top_k=%d, role=%s",
+                    len(query_texts), top_k, role or "ALL")
+        return results
+
+    def _sanitize_output_fields(self, output_fields: List[str]) -> List[str]:
+        """Milvus 稀疏检索时不允许在 output_fields 返回 sparse 字段。"""
+        sparse = self.config.bm25_output_field
+        cleaned = [f for f in output_fields if f != sparse]
+        if len(cleaned) != len(output_fields):
+            logger.warning("output_fields 包含 '%s'，已自动移除以避免 Milvus 报错", sparse)
+        return cleaned
 
     def count(self) -> int:
         """返回 Collection 中的记录总数"""

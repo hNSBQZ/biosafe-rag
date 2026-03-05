@@ -64,7 +64,7 @@
     "start_line": 15,
     "end_line": 15,
     "token_estimate": 126,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "pcr-sop.md_block4_chunk0",
@@ -104,7 +104,7 @@
   {
     "chunk_id": "pcr-sop.md_block6_chunk0",
     "content": "模板\n# 模板\nPCR 扩增对模板的要求不高，单链、双链 DNA 均可作为扩增片段，虽然 PCR 能够扩增微量的 DNA，为了保证扩增的特异性，对不同来源的模板，起始浓度有一定要求，如下：\n模板可以是纯化后的样品也可以是粗制品，不同来源的模板采取不同的处理方法，实验模板的纯化越简单越好，但模板中如果含有任何的 Taq 酶抑制剂、蛋白酶、核酸酶等，会干扰反应。模板提取注意保存，不能放置太久，避免反复冻融并防止降解。多数人会忽略这一问题，当实验结果没有任何条带时，可优先考虑是否为模板降解的原因。",
-    "role": "regulation",
+    "role": "knowledge",
     "role_confidence": 0,
     "block_id": "pcr-sop.md_block6",
     "source_file": "pcr-sop.md",
@@ -115,7 +115,7 @@
     "start_line": 50,
     "end_line": 53,
     "token_estimate": 304,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "pcr-sop.md_block7_chunk0",
@@ -137,7 +137,7 @@
   {
     "chunk_id": "pcr-sop.md_block8_chunk0",
     "content": "举例：细菌DNA的提取方法\n# 举例：细菌DNA的提取方法\n1. 取 1-2ml 的菌液，12000rpm 离心 10min，去除上清，得到沉淀\n\n2. 根据得到沉淀量，加入 500ul 左右的 TE（配方如下）悬浮沉淀，并加入 20ul 的溶菌酶，37 度保温 30min\n3. 加入 30ul 10%的 SDS 和 1mg 蛋白酶 K，混匀后 37 度保温 1h\n4. 加入 120ul 5mol/l 氯化钠，充分混匀，65 度放置 10min",
-    "role": "reagent",
+    "role": "sop",
     "role_confidence": 2,
     "block_id": "pcr-sop.md_block8",
     "source_file": "pcr-sop.md",
@@ -148,7 +148,7 @@
     "start_line": 54,
     "end_line": 58,
     "token_estimate": 160,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "pcr-sop.md_block8_chunk1",
@@ -169,7 +169,7 @@
   {
     "chunk_id": "pcr-sop.md_block9_chunk0",
     "content": "其他\n# 其他\n\n1. Taq DNA 聚合酶：Taq 酶种类有很多，热启动酶，高保真酶，根据各自实验的应用选择合适的酶扩增，一般\n的反应，化学修饰的热启动酶即能很好的完成，化学修饰热启动酶能够避免低温下任何非特异性产物产生。酶的浓度对扩增有一定影响，酶用量过多，会导致非特异性产物，操作按照说明书即可。",
-    "role": "sop",
+    "role": "reagent",
     "role_confidence": 0,
     "block_id": "pcr-sop.md_block9",
     "source_file": "pcr-sop.md",
@@ -180,7 +180,7 @@
     "start_line": 63,
     "end_line": 71,
     "token_estimate": 183,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "pcr-sop.md_block9_chunk1",
@@ -218,7 +218,7 @@
   {
     "chunk_id": "pcr-sop.md_block11_chunk0",
     "content": "上样缓冲液\n# 上样缓冲液\n6xLoding buffer\n\n0.2 5 \\% 二甲苯青， 0.2 5 \\% 溴酚蓝， 30 \\% 甘油溶于双蒸水中， 4 ^ C 保存。",
-    "role": "knowledge",
+    "role": "reagent",
     "role_confidence": 1,
     "block_id": "pcr-sop.md_block11",
     "source_file": "pcr-sop.md",
@@ -229,7 +229,7 @@
     "start_line": 83,
     "end_line": 88,
     "token_estimate": 49,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "pcr-sop.md_block12_chunk0",
@@ -610,7 +610,7 @@
     "start_line": 15,
     "end_line": 15,
     "token_estimate": 126,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "核酸.md_block28_chunk0",
@@ -650,7 +650,7 @@
   {
     "chunk_id": "核酸.md_block30_chunk0",
     "content": "模板\n# 模板\nPCR 扩增对模板的要求不高，单链、双链 DNA 均可作为扩增片段，虽然 PCR 能够扩增微量的 DNA，为了保证扩增的特异性，对不同来源的模板，起始浓度有一定要求，如下：\n\n模板可以是纯化后的样品也可以是粗制品，不同来源的模板采取不同的处理方法，实验模板的纯化越简单越好，但模板中如果含有任何的 Taq 酶抑制剂、蛋白酶、核酸酶等，会干扰反应。模板提取注意保存，不能放置太久，避免反复冻融并防止降解。多数人会忽略这一问题，当实验结果没有任何条带时，可优先考虑是否为模板降解的原因。",
-    "role": "regulation",
+    "role": "knowledge",
     "role_confidence": 0,
     "block_id": "核酸.md_block30",
     "source_file": "核酸.md",
@@ -661,7 +661,7 @@
     "start_line": 52,
     "end_line": 56,
     "token_estimate": 304,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "核酸.md_block31_chunk0",
@@ -683,7 +683,7 @@
   {
     "chunk_id": "核酸.md_block32_chunk0",
     "content": "举例：细菌DNA的提取方法\n# 举例：细菌DNA的提取方法\n1. 取 1-2ml 的菌液，12000rpm 离心 10min，去除上清，得到沉淀\n\n2. 根据得到沉淀量，加入 500ul 左右的 TE（配方如下）悬浮沉淀，并加入 20ul 的溶菌酶，37 度保温 30min\n3. 加入 30ul 10%的 SDS 和 1mg 蛋白酶 K，混匀后 37 度保温 1h\n4. 加入 120ul 5mol/l 氯化钠，充分混匀，65 度放置 10min",
-    "role": "reagent",
+    "role": "sop",
     "role_confidence": 2,
     "block_id": "核酸.md_block32",
     "source_file": "核酸.md",
@@ -694,7 +694,7 @@
     "start_line": 57,
     "end_line": 61,
     "token_estimate": 160,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "核酸.md_block32_chunk1",
@@ -715,7 +715,7 @@
   {
     "chunk_id": "核酸.md_block33_chunk0",
     "content": "其他\n# 其他\n\n1. Taq DNA 聚合酶：Taq 酶种类有很多，热启动酶，高保真酶，根据各自实验的应用选择合适的酶扩增，一般\n的反应，化学修饰的热启动酶即能很好的完成，化学修饰热启动酶能够避免低温下任何非特异性产物产生。酶的浓度对扩增有一定影响，酶用量过多，会导致非特异性产物，操作按照说明书即可。",
-    "role": "sop",
+    "role": "reagent",
     "role_confidence": 0,
     "block_id": "核酸.md_block33",
     "source_file": "核酸.md",
@@ -726,7 +726,7 @@
     "start_line": 66,
     "end_line": 74,
     "token_estimate": 183,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "核酸.md_block33_chunk1",
@@ -764,7 +764,7 @@
   {
     "chunk_id": "核酸.md_block35_chunk0",
     "content": "上样缓冲液\n# 上样缓冲液\n6xLoding buffer\n\n0.2 5 \\% 二甲苯青， 0.2 5 \\% 溴酚蓝， 30 \\% 甘油溶于双蒸水中， 4 ^ C 保存。",
-    "role": "knowledge",
+    "role": "reagent",
     "role_confidence": 1,
     "block_id": "核酸.md_block35",
     "source_file": "核酸.md",
@@ -775,7 +775,7 @@
     "start_line": 86,
     "end_line": 91,
     "token_estimate": 49,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "核酸.md_block36_chunk0",
@@ -847,7 +847,7 @@
   {
     "chunk_id": "通用安全.md_block40_chunk0",
     "content": "2 术语和定义 > 2.2 事故 accident\n# 2 术语和定义\n下列术语和定义适用于本标准：\n\n# 2.1 气溶胶 aerosols\n悬浮于气体介质中的粒径一般为 0.0 0 1 m ~ 1 0 0 m 的固态或液态微小粒子形成的相对稳定的分散体系。\n\n# 2.2 事故 accident\n造成死亡、疾病、伤害、损坏以及其他损失的意外情况。",
-    "role": "emergency",
+    "role": "regulation",
     "role_confidence": 1,
     "block_id": "通用安全.md_block40",
     "source_file": "通用安全.md",
@@ -859,12 +859,12 @@
     "start_line": 7,
     "end_line": 12,
     "token_estimate": 144,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block41_chunk0",
     "content": "2 术语和定义 > 2.4 生物因子 biological agents\n# 2.3 气锁 air lock\n具备机械送排风系统、整体消毒灭菌条件、化学喷淋（适用时）和压力可监控的气密室，其门具有互锁功能，不能同时处于开启状态。\n\n# 2.4 生物因子 biological agents\n微生物和生物活性物质。",
-    "role": "sop",
+    "role": "knowledge",
     "role_confidence": 0,
     "block_id": "通用安全.md_block41",
     "source_file": "通用安全.md",
@@ -876,7 +876,7 @@
     "start_line": 13,
     "end_line": 16,
     "token_estimate": 126,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block42_chunk0",
@@ -893,12 +893,12 @@
     "start_line": 17,
     "end_line": 20,
     "token_estimate": 182,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block43_chunk0",
     "content": "2 术语和定义 > 2.8 危险 hazard\n# 2.7 定向气流 directional airflow\n特指从污染概率小区域流向污染概率大区域的受控制的气流。\n\n# 2.8 危险 hazard\n可能导致死亡、伤害或疾病、财产损失、工作环境破坏或这些情况组合的根源或状态。",
-    "role": "emergency",
+    "role": "knowledge",
     "role_confidence": 2,
     "block_id": "通用安全.md_block43",
     "source_file": "通用安全.md",
@@ -910,12 +910,12 @@
     "start_line": 21,
     "end_line": 24,
     "token_estimate": 118,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block44_chunk0",
     "content": "2 术语和定义 > 2.10 高效空气过滤器（HEPA 过滤器）high efficiencyparticulate air filter\n# 2.9 危险识别 hazard identification\n识别存在的危险并确定其特性的过程。\n\n# 2.10 高效空气过滤器（HEPA 过滤器）high efficiencyparticulate air filter\n通常以 0.3 ~ m ~ 微粒为测试物，在规定的条件下滤除效率高于9 9.9 7 \\% 的空气过滤器。",
-    "role": "regulation",
+    "role": "knowledge",
     "role_confidence": 1,
     "block_id": "通用安全.md_block44",
     "source_file": "通用安全.md",
@@ -927,7 +927,7 @@
     "start_line": 25,
     "end_line": 28,
     "token_estimate": 130,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block45_chunk0",
@@ -961,7 +961,7 @@
     "start_line": 35,
     "end_line": 36,
     "token_estimate": 122,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block47_chunk0",
@@ -983,7 +983,7 @@
   {
     "chunk_id": "通用安全.md_block47_chunk1",
     "content": "2 术语和定义 > 2.16 个体防护装备 personal protective equipment，PPE\n2.18 风险评估 risk assessment\n评估风险大小以及确定是否可接受的全过程。\n\n2.19 风险控制 risk control\n为降低风险而采取的综合措施。",
-    "role": "knowledge",
+    "role": "regulation",
     "role_confidence": 1,
     "block_id": "通用安全.md_block47",
     "source_file": "通用安全.md",
@@ -995,7 +995,7 @@
     "start_line": 43,
     "end_line": 46,
     "token_estimate": 89,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block48_chunk0",
@@ -1029,12 +1029,12 @@
     "start_line": 68,
     "end_line": 70,
     "token_estimate": 281,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block48_chunk2",
     "content": "3 风险评估及风险控制 > 3.1 实验室应建立并维持风险评估和风险控制程序，以持续进行危险识别、风险评估和实施必要的控制措施。实验室需要考虑的内容包括：\n3.1.5 应定期进行风险评估或对风险评估报告复审，评估的周期应根据实验室活动和风险特征而确定。\n\n3.1.6 开展新的实验室活动或欲改变经评估过的实验室活动（包括相关的设施、设备、人员、活动范围、管理等），应事先或重新进行风险评估。",
-    "role": "equipment",
+    "role": "sop",
     "role_confidence": 1,
     "block_id": "通用安全.md_block48",
     "source_file": "通用安全.md",
@@ -1046,7 +1046,7 @@
     "start_line": 71,
     "end_line": 72,
     "token_estimate": 241,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block48_chunk3",
@@ -1063,7 +1063,7 @@
     "start_line": 73,
     "end_line": 75,
     "token_estimate": 242,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block48_chunk4",
@@ -1097,7 +1097,7 @@
     "start_line": 78,
     "end_line": 79,
     "token_estimate": 214,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block49_chunk0",
@@ -1165,7 +1165,7 @@
     "start_line": 85,
     "end_line": 90,
     "token_estimate": 623,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block53_chunk0",
@@ -1187,7 +1187,7 @@
   {
     "chunk_id": "通用安全.md_block54_chunk0",
     "content": "4 实验室生物安全防护水平分级 > 4.4 根据实验活动的差异、采用的个体防护装备和基础隔离设施的不同，实验室分以下情况：\n4.4 根据实验活动的差异、采用的个体防护装备和基础隔离设施的不同，实验室分以下情况：\n\n4.4.1 操作通常认为非经空气传播致病性生物因子的实验室。\n\n4.4.2 可有效利用安全隔离装置（如：生物安全柜）操作常规量经空气传播致病性生物因子的实验室。",
-    "role": "sop",
+    "role": "regulation",
     "role_confidence": 1,
     "block_id": "通用安全.md_block54",
     "source_file": "通用安全.md",
@@ -1199,7 +1199,7 @@
     "start_line": 93,
     "end_line": 95,
     "token_estimate": 225,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block54_chunk1",
@@ -1253,7 +1253,7 @@
   {
     "chunk_id": "通用安全.md_block55_chunk2",
     "content": "5 实验室设计原则及基本要求\n5.6 实验室的走廊和通道应不妨碍人员和物品通过。\n\n5.7 应设计紧急撤离路线，紧急出口应有明显的标识。\n\n5.8 房间的门根据需要安装门锁，门锁应便于内部快速打开。\n\n5.9 需要时（如：正当操作危险材料时），房间的入口处应有警示和进入限制。",
-    "role": "emergency",
+    "role": "regulation",
     "role_confidence": 2,
     "block_id": "通用安全.md_block55",
     "source_file": "通用安全.md",
@@ -1264,7 +1264,7 @@
     "start_line": 105,
     "end_line": 108,
     "token_estimate": 160,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block55_chunk3",
@@ -1280,7 +1280,7 @@
     "start_line": 109,
     "end_line": 111,
     "token_estimate": 192,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block55_chunk4",
@@ -1296,7 +1296,7 @@
     "start_line": 112,
     "end_line": 114,
     "token_estimate": 229,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block55_chunk5",
@@ -1328,7 +1328,7 @@
     "start_line": 118,
     "end_line": 118,
     "token_estimate": 61,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block56_chunk0",
@@ -1362,7 +1362,7 @@
     "start_line": 124,
     "end_line": 126,
     "token_estimate": 166,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block56_chunk2",
@@ -1401,7 +1401,7 @@
   {
     "chunk_id": "通用安全.md_block56_chunk4",
     "content": "6 实验室设施和设备要求 > 6．1 BSL-1 实验室\n6.1.14 若使用高毒性、放射性等物质，应配备相应的安全设施、设备和个体防护装备，应符合国家、地方的相关规定和要求。\n\n6.1.15 若使用高压气体和可燃气体，应有安全措施，应符合国家、地方的相关规定和要求。\n\n6.1.16 应设应急照明装置。",
-    "role": "equipment",
+    "role": "regulation",
     "role_confidence": 1,
     "block_id": "通用安全.md_block56",
     "source_file": "通用安全.md",
@@ -1413,7 +1413,7 @@
     "start_line": 134,
     "end_line": 136,
     "token_estimate": 158,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block56_chunk5",
@@ -1557,7 +1557,7 @@
   {
     "chunk_id": "通用安全.md_block59_chunk0",
     "content": "6 实验室设施和设备要求 > 6．3 BSL-3 实验室 > 6．3．2 围护结构\n# 6．3．2 围护结构\n\n6.3.2.1 围护结构（包括墙体）应符合国家对该类建筑的抗震要求和防火要求。\n\n6.3.2.2天花板、地板、墙间的交角应易清洁和消毒灭菌。\n\n6.3.2.3实验室防护区内围护结构的所有缝隙和贯穿处的接缝都应可靠密封。",
-    "role": "equipment",
+    "role": "regulation",
     "role_confidence": 2,
     "block_id": "通用安全.md_block59",
     "source_file": "通用安全.md",
@@ -1570,7 +1570,7 @@
     "start_line": 160,
     "end_line": 163,
     "token_estimate": 158,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block59_chunk1",
@@ -1588,7 +1588,7 @@
     "start_line": 164,
     "end_line": 166,
     "token_estimate": 176,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block59_chunk2",
@@ -1642,7 +1642,7 @@
     "start_line": 173,
     "end_line": 175,
     "token_estimate": 177,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block60_chunk2",
@@ -1827,7 +1827,7 @@
   {
     "chunk_id": "通用安全.md_block62_chunk3",
     "content": "6 实验室设施和设备要求 > 6．3 BSL-3 实验室 > 6．3．5 污物处理及消毒灭菌系统\n6.3.5.8 应使用可靠的方式处理处置污水（包括污物），并应对消毒灭菌效果进行监测，以确保达到排放要求。\n\n6.3.5.9 应在风险评估的基础上，适当处理实验室辅助区的污水，并应监测，以确保排放到市政管网之前达到排放要求。",
-    "role": "equipment",
+    "role": "regulation",
     "role_confidence": 2,
     "block_id": "通用安全.md_block62",
     "source_file": "通用安全.md",
@@ -1840,7 +1840,7 @@
     "start_line": 198,
     "end_line": 199,
     "token_estimate": 173,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block62_chunk4",
@@ -1989,7 +1989,7 @@
   {
     "chunk_id": "通用安全.md_block65_chunk4",
     "content": "6 实验室设施和设备要求 > 6．3 BSL-3 实验室 > 6．3．8 自控、监视与报警系统\n6.3.8.11 中央控制系统的信号采集间隔时间应不超过1min，各参数应易于区分和识别。\n\n6.3.8.12 中央控制系统应能对所有故障和控制指标进行报警，报警应区分一般报警和紧急报警。\n\n6.3.8.13 紧急报警应为声光同时报警，应可以向实验室内外人员同时发出紧急警报；应在实验室核心工作间内设置紧急报警按钮。",
-    "role": "emergency",
+    "role": "equipment",
     "role_confidence": 0,
     "block_id": "通用安全.md_block65",
     "source_file": "通用安全.md",
@@ -2002,7 +2002,7 @@
     "start_line": 223,
     "end_line": 225,
     "token_estimate": 220,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block65_chunk5",
@@ -2079,7 +2079,7 @@
   {
     "chunk_id": "通用安全.md_block67_chunk1",
     "content": "6 实验室设施和设备要求 > 6．3 BSL-3 实验室 > 6．3．10 参数要求\n6.3.10.3 实验室防护区各房间的最小换气次数应不小于12次/h\n\n6.3.10.4 实验室的温度宜控制在 1 8 ^ C ~ 2 6 ^ C 范围内。\n\n6.3.10.5 正常情况下，实验室的相对湿度宜控制在 3 0 \\% ~ 7 0 \\% 范围内；消毒状态下，实验室的相对湿度应能满足消毒灭菌的技术要求。",
-    "role": "equipment",
+    "role": "regulation",
     "role_confidence": 2,
     "block_id": "通用安全.md_block67",
     "source_file": "通用安全.md",
@@ -2092,7 +2092,7 @@
     "start_line": 234,
     "end_line": 236,
     "token_estimate": 164,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block67_chunk2",
@@ -2178,7 +2178,7 @@
     "start_line": 246,
     "end_line": 247,
     "token_estimate": 219,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block68_chunk4",
@@ -2195,7 +2195,7 @@
     "start_line": 248,
     "end_line": 250,
     "token_estimate": 190,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block68_chunk5",
@@ -2217,7 +2217,7 @@
   {
     "chunk_id": "通用安全.md_block68_chunk6",
     "content": "6 实验室设施和设备要求 > 6．4 BSL-4 实验室\n6.4.15 实验室的排风应经过两级HEPA过滤器处理后排放。\n\n6.4.16 应可以在原位对送风HEPA 过滤器进行消毒灭菌和检漏。\n\n6.4.17 实验室防护区内所有需要运出实验室的物品或其包装的表面应经过可靠消毒灭菌。\n\n6.4.18 化学淋浴消毒灭菌装置应在无电力供应的情况下仍可以使用，消毒灭菌剂储存器的容量应满足所有情况下对消毒灭菌剂使用量的需求。",
-    "role": "sop",
+    "role": "regulation",
     "role_confidence": 0,
     "block_id": "通用安全.md_block68",
     "source_file": "通用安全.md",
@@ -2229,12 +2229,12 @@
     "start_line": 254,
     "end_line": 257,
     "token_estimate": 229,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block69_chunk0",
     "content": "6 实验室设施和设备要求 > 6.5 动物生物安全实验室 > 6.5.1 ABSL-1 实验室\n# 6.5 动物生物安全实验室\n\n# 6.5.1 ABSL-1 实验室\n\n6.5.1.1 动物饲养间应与建筑物内的其他区域隔离。\n\n6.5.1.2 动物饲养间的门应有可视窗，向里开；打开的门应能够自动关闭，需要时，可以锁上。\n\n6.5.1.3 动物饲养间的工作表面应防水和易于消毒灭菌。",
-    "role": "equipment",
+    "role": "regulation",
     "role_confidence": 2,
     "block_id": "通用安全.md_block69",
     "source_file": "通用安全.md",
@@ -2247,7 +2247,7 @@
     "start_line": 258,
     "end_line": 262,
     "token_estimate": 173,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block69_chunk1",
@@ -2265,7 +2265,7 @@
     "start_line": 263,
     "end_line": 265,
     "token_estimate": 166,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block69_chunk2",
@@ -2288,7 +2288,7 @@
   {
     "chunk_id": "通用安全.md_block69_chunk3",
     "content": "6 实验室设施和设备要求 > 6.5 动物生物安全实验室 > 6.5.1 ABSL-1 实验室\n6.5.1.12 动物尸体及相关废物的处置设施和设备应符合国家相关规定的要求。",
-    "role": "equipment",
+    "role": "regulation",
     "role_confidence": 2,
     "block_id": "通用安全.md_block69",
     "source_file": "通用安全.md",
@@ -2301,12 +2301,12 @@
     "start_line": 271,
     "end_line": 271,
     "token_estimate": 84,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block70_chunk0",
     "content": "6 实验室设施和设备要求 > 6.5 动物生物安全实验室 > 6.5.2 ABSL-2 实验室\n# 6.5.2 ABSL-2 实验室\n\n6.5.2.1 适用时，应符合 6.5.1 的要求。\n\n6.5.2.2 动物饲养间应在出入口处设置缓冲间。\n\n6.5.2.3 应设置非手动洗手池或手部清洁装置，宜设置在出口处。\n\n6.5.2.4 应在邻近区域配备高压蒸汽灭菌器。\n\n6.5.2.5 适用时，应在安全隔离装置内从事可能产生有害气溶胶的活动；排气应经HEPA过滤器的过滤后排出。",
-    "role": "equipment",
+    "role": "regulation",
     "role_confidence": 1,
     "block_id": "通用安全.md_block70",
     "source_file": "通用安全.md",
@@ -2319,12 +2319,12 @@
     "start_line": 272,
     "end_line": 277,
     "token_estimate": 211,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block70_chunk1",
     "content": "6 实验室设施和设备要求 > 6.5 动物生物安全实验室 > 6.5.2 ABSL-2 实验室\n6.5.2.6 应将动物饲养间的室内气压控制为负压，气体应直接排放到其所在的建筑物外。\n\n6.5.2.7 应根据风险评估的结果，确定是否需要使用HEPA过滤器过滤动物饲养间排出的气体。\n\n6.5.2.8 当不能满足6.5.2.5时，应使用HEPA过滤器过滤动物饲养间排出的气体。",
-    "role": "equipment",
+    "role": "regulation",
     "role_confidence": 2,
     "block_id": "通用安全.md_block70",
     "source_file": "通用安全.md",
@@ -2337,12 +2337,12 @@
     "start_line": 278,
     "end_line": 280,
     "token_estimate": 183,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block70_chunk2",
     "content": "6 实验室设施和设备要求 > 6.5 动物生物安全实验室 > 6.5.2 ABSL-2 实验室\n6.5.2.9 实验室的外部排风口应至少高出本实验室所在建筑的顶部2 ~ m ，应有防风、防雨、防鼠、防虫设计，但不应影响气体向上空排放。\n\n6.5.2.10 污水（包括污物）应消毒灭菌处理，并应对消毒灭菌效果进行监测，以确保达到排放要求。",
-    "role": "equipment",
+    "role": "regulation",
     "role_confidence": 1,
     "block_id": "通用安全.md_block70",
     "source_file": "通用安全.md",
@@ -2355,12 +2355,12 @@
     "start_line": 281,
     "end_line": 282,
     "token_estimate": 170,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block71_chunk0",
     "content": "6 实验室设施和设备要求 > 6.5 动物生物安全实验室 > 6.5.3 ABSL-3 实验室\n# 6.5.3 ABSL-3 实验室\n\n6.5.3.1 适用时，应符合 6.5.2 的要求。\n\n6.5.3.2 应在实验室防护区内设淋浴间，需要时，应设置强制淋浴装置。\n\n6.5.3.3 动物饲养间属于核心工作间，如果有入口和出口，均应设置缓冲间。\n\n6.5.3.4 动物饲养间应尽可能设在整个实验室的中心部位，不应直接与其他公共区域相邻。",
-    "role": "equipment",
+    "role": "regulation",
     "role_confidence": 1,
     "block_id": "通用安全.md_block71",
     "source_file": "通用安全.md",
@@ -2373,12 +2373,12 @@
     "start_line": 283,
     "end_line": 287,
     "token_estimate": 198,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block71_chunk1",
     "content": "6 实验室设施和设备要求 > 6.5 动物生物安全实验室 > 6.5.3 ABSL-3 实验室\n6.5.3.5 适用于4.4.1实验室的防护区应至少包括淋浴间、防护服更换间、缓冲间及核心工作间。 当不能有效利用安全隔离装置饲养动物时，应根据进一步的风险评估确定实验室的生物安全防护要求。\n\n6.5.3.6 适用于4.4.3的动物饲养间的缓冲间应为气锁，并具备对动物饲养间的防护服或传递物品的表面进行消毒灭菌的条件。",
-    "role": "equipment",
+    "role": "regulation",
     "role_confidence": 1,
     "block_id": "通用安全.md_block71",
     "source_file": "通用安全.md",
@@ -2391,7 +2391,7 @@
     "start_line": 288,
     "end_line": 289,
     "token_estimate": 230,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block71_chunk2",
@@ -2414,7 +2414,7 @@
   {
     "chunk_id": "通用安全.md_block71_chunk3",
     "content": "6 实验室设施和设备要求 > 6.5 动物生物安全实验室 > 6.5.3 ABSL-3 实验室\n6.5.3.10 应有装置和技术对动物尸体和废物进行可靠消毒灭菌。\n\n6.5.3.11 应有装置和技术对动物笼具进行清洁和可靠消毒灭菌。\n\n6.5.3.12 需要时，应有装置和技术对所有物品或其包装的表面在运出动物饲养间前进行清洁和可靠消毒灭菌。",
-    "role": "sop",
+    "role": "equipment",
     "role_confidence": 1,
     "block_id": "通用安全.md_block71",
     "source_file": "通用安全.md",
@@ -2427,12 +2427,12 @@
     "start_line": 293,
     "end_line": 295,
     "token_estimate": 176,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block71_chunk4",
     "content": "6 实验室设施和设备要求 > 6.5 动物生物安全实验室 > 6.5.3 ABSL-3 实验室\n6.5.3.13 应在风险评估的基础上，适当处理防护区内淋浴间的污水，并应对灭菌效果进行监测，以确保达到排放要求。\n\n6.5.3.14 适用于4.4.3的动物饲养间，应根据风险评估的结果，确定其排出的气体是否需要经过两级HEPA过滤器的过滤后排出。",
-    "role": "equipment",
+    "role": "regulation",
     "role_confidence": 1,
     "block_id": "通用安全.md_block71",
     "source_file": "通用安全.md",
@@ -2445,12 +2445,12 @@
     "start_line": 296,
     "end_line": 297,
     "token_estimate": 177,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block71_chunk5",
     "content": "6 实验室设施和设备要求 > 6.5 动物生物安全实验室 > 6.5.3 ABSL-3 实验室\n6.5.3.15 适用于4.4.3的动物饲养间，应可以在原位对送风HEPA过滤器进行消毒灭菌和检漏。\n\n6.5.3.16 适用于4.4.1和4.4.2的动物饲养间的气压（负压）与室外大气压的压差值应不小于60Pa，与相邻区域的压差（负压）应不小于15Pa。\n\n6.5.3.17 适用于4.4.3的动物饲养间的气压（负压）与室外大气压的压差值应不小于80Pa，与相邻区域的压差（负压）应不小于25Pa。",
-    "role": "equipment",
+    "role": "regulation",
     "role_confidence": 2,
     "block_id": "通用安全.md_block71",
     "source_file": "通用安全.md",
@@ -2463,12 +2463,12 @@
     "start_line": 298,
     "end_line": 300,
     "token_estimate": 230,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block71_chunk6",
     "content": "6 实验室设施和设备要求 > 6.5 动物生物安全实验室 > 6.5.3 ABSL-3 实验室\n6.5.3.18 适用于4.4.3的动物饲养间及其缓冲间的气密性应达到在关闭受测房间所有通路并维持房间内的温度在设计范围上限的条件下，若使空气压力维持在250Pa时，房间内每小时泄漏的空气量应不超过受测房间净容积的 1 0 \\% 。",
-    "role": "equipment",
+    "role": "regulation",
     "role_confidence": 2,
     "block_id": "通用安全.md_block71",
     "source_file": "通用安全.md",
@@ -2481,12 +2481,12 @@
     "start_line": 301,
     "end_line": 301,
     "token_estimate": 173,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block71_chunk7",
     "content": "6 实验室设施和设备要求 > 6.5 动物生物安全实验室 > 6.5.3 ABSL-3 实验室\n6.5.3.19 在适用于4.4.3的动物饲养间从事可传染人的病原微生物活动时，应根据进一步的风险评估确定实验室的生物安全防护要求；适用时，应经过相关主管部门的批准。",
-    "role": "equipment",
+    "role": "regulation",
     "role_confidence": 1,
     "block_id": "通用安全.md_block71",
     "source_file": "通用安全.md",
@@ -2499,12 +2499,12 @@
     "start_line": 302,
     "end_line": 302,
     "token_estimate": 139,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block72_chunk0",
     "content": "6 实验室设施和设备要求 > 6.5 动物生物安全实验室 > 6.5.4 ABSL-4 实验室\n# 6.5.4 ABSL-4 实验室\n\n6.5.4.1 适用时，应符合 6.5.3 的要求。\n\n6.5.4.2 淋浴间应设置强制淋浴装置。\n\n6.5.4.3 动物饲养间的缓冲间应为气锁。\n\n6.5.4.4 应有严格限制进入动物饲养间的门禁措施。\n\n6.5.4.5 动物饲养间的气压（负压）与室外大气压的压差值应不小于100Pa；与相邻区域的压差（负压）应不小于 2 5 P a 。",
-    "role": "equipment",
+    "role": "regulation",
     "role_confidence": 1,
     "block_id": "通用安全.md_block72",
     "source_file": "通用安全.md",
@@ -2517,12 +2517,12 @@
     "start_line": 303,
     "end_line": 308,
     "token_estimate": 197,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block72_chunk1",
     "content": "6 实验室设施和设备要求 > 6.5 动物生物安全实验室 > 6.5.4 ABSL-4 实验室\n6.5.4.6 动物饲养间及其缓冲间的气密性应达到在关闭受测房间所有通路并维持房间内的温度在设计范围上限的条件下，当房间内的空气压力上升到500Pa后，20 min内自然衰减的气压小于250Pa。\n\n6.5.4.7 应有装置和技术对所有物品或其包装的表面在运出动物饲养间前进行清洁和可靠消毒灭菌。",
-    "role": "equipment",
+    "role": "regulation",
     "role_confidence": 2,
     "block_id": "通用安全.md_block72",
     "source_file": "通用安全.md",
@@ -2535,12 +2535,12 @@
     "start_line": 309,
     "end_line": 310,
     "token_estimate": 212,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block73_chunk0",
     "content": "6 实验室设施和设备要求 > 6.5 动物生物安全实验室 > 6.5.5 对从事无脊椎动物操作实验室设施的要求\n# 6.5.5 对从事无脊椎动物操作实验室设施的要求\n\n6.5.5.1 该类动物设施的生物安全防护水平应根据国家相关主管部门的规定和风险评估的结果确定。\n\n6.5.5.2 如果从事某些节肢动物（特别是可飞行、快爬或跳跃的昆虫）的实验活动，应采取以下适用的措施（但不限于）：\na)应通过缓冲间进入动物饲养间，缓冲间内应安装适用的捕虫器，并应在门上安装防节肢动物逃逸的纱网；\nb)应在所有关键的可开启的门窗上安装防节肢动物逃逸的纱网；\nc)应在所有通风管道的关键节点安装防节肢动物逃逸的纱网；应具备分房间饲养已感染和未感染节肢动物的条件；\nd)应具备密闭和进行整体消毒灭菌的条件；\ne)应设喷雾式杀虫装置；\nf)应设制冷装置，需要时，可以及时降低动物的活动能力；\ng)应有机制确保水槽和存水弯管内的液体或消毒灭菌液不干涸；\nh)只要可行，应对所有废物高压灭菌；\ni)应有机制监测和记录会飞、爬、跳跃的节肢动物幼虫和成虫的数量；\nj)应配备适用于放置装蜱螨容器的油碟；\nk)应具备带双层网的笼具以饲养或观察已感染或潜在感染的逃逸能力强的节肢动物；\nl)应具备适用的生物安全柜或相当的安全隔离装置以操作已感染或潜在感染的节肢动物；\nm)应具备操作已感染或潜在感染的节肢动物的低温盘；\nn)需要时，应设置监视器和通讯设备。",
-    "role": "sop",
+    "role": "regulation",
     "role_confidence": 0,
     "block_id": "通用安全.md_block73",
     "source_file": "通用安全.md",
@@ -2553,12 +2553,12 @@
     "start_line": 311,
     "end_line": 327,
     "token_estimate": 761,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block73_chunk1",
     "content": "6 实验室设施和设备要求 > 6.5 动物生物安全实验室 > 6.5.5 对从事无脊椎动物操作实验室设施的要求\n6.5.5.3 是否需要其他措施，应根据风险评估的结果确定。",
-    "role": "sop",
+    "role": "regulation",
     "role_confidence": 0,
     "block_id": "通用安全.md_block73",
     "source_file": "通用安全.md",
@@ -2571,7 +2571,7 @@
     "start_line": 328,
     "end_line": 328,
     "token_estimate": 91,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block74_chunk0",
@@ -2963,7 +2963,7 @@
   {
     "chunk_id": "通用安全.md_block83_chunk2",
     "content": "7 管理要求 > 7.4 安全管理体系文件 > 7.4.7 标识系统\n7.4.7.5 应在须验证或校准的实验室设备的明显位置注明设备的可用状态、验证周期、下次验证或校准的时间等信息。\n\n7.4.7.6 实验室入口处应有标识，明确说明生物防护级别、操作的致病性生物因子、实验室负责人姓名、紧急联络方式和国际通用的生物危险符号；适用时，应同时注明其他危险。",
-    "role": "equipment",
+    "role": "regulation",
     "role_confidence": 2,
     "block_id": "通用安全.md_block83",
     "source_file": "通用安全.md",
@@ -2976,7 +2976,7 @@
     "start_line": 416,
     "end_line": 417,
     "token_estimate": 201,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block83_chunk3",
@@ -3429,7 +3429,7 @@
   {
     "chunk_id": "通用安全.md_block92_chunk3",
     "content": "7 管理要求 > 7.14 实验室人员管理\n7.14.8 应培训员工独立工作的能力。\n\n7.14.9 应定期评价员工可以胜任其工作任务的能力。\n\n7.14.10 应按工作的复杂程度定期评价所有员工的表现，应至少每12个月评价一次。\n\n7.14.11 人员培训计划应包括（不限于）：\na)上岗培训，包括对较长期离岗或下岗人员的再上岗培训；\nb)实验室管理体系培训；\nc)安全知识及技能培训；\nd)实验室设施设备（包括个体防护装备）的安全使用；\ne)应急措施与现场救治；\nf)定期培训与继续教育；\ng)人员能力的考核与评估。",
-    "role": "notice",
+    "role": "regulation",
     "role_confidence": 2,
     "block_id": "通用安全.md_block92",
     "source_file": "通用安全.md",
@@ -3441,12 +3441,12 @@
     "start_line": 550,
     "end_line": 560,
     "token_estimate": 275,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block92_chunk4",
     "content": "7 管理要求 > 7.14 实验室人员管理\n7.14.12 实验室或其所在机构应维持每个员工的人事资料，可靠保存并保护隐私权。人事档案应包括（不限于）：\na)员工的岗位职责说明；\nb)岗位风险说明及员工的知情同意证明；\nc)教育背景和专业资格证明；\nd)培训记录，应有员工与培训者的签字及日期；\ne)员工的免疫、健康检查、职业禁忌症等资料；\nf)内部和外部的继续教育记录及成绩；\ng)与工作安全相关的意外事件、事故报告；\nh)有关确认员工能力的证据，应有能力评价的日期和承认该员工能力的日期或期限；\ni)员工表现评价。",
-    "role": "notice",
+    "role": "regulation",
     "role_confidence": 1,
     "block_id": "通用安全.md_block92",
     "source_file": "通用安全.md",
@@ -3458,7 +3458,7 @@
     "start_line": 561,
     "end_line": 570,
     "token_estimate": 304,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block93_chunk0",
@@ -3543,7 +3543,7 @@
     "start_line": 582,
     "end_line": 583,
     "token_estimate": 109,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block95_chunk0",
@@ -3560,7 +3560,7 @@
     "start_line": 584,
     "end_line": 585,
     "token_estimate": 153,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block95_chunk1",
@@ -3594,7 +3594,7 @@
     "start_line": 591,
     "end_line": 593,
     "token_estimate": 166,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block95_chunk3",
@@ -3611,7 +3611,7 @@
     "start_line": 594,
     "end_line": 595,
     "token_estimate": 122,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block96_chunk0",
@@ -3735,7 +3735,7 @@
   {
     "chunk_id": "通用安全.md_block97_chunk1",
     "content": "7 管理要求 > 7.19 废物处置\n7.19.3 应有措施和能力安全处理和处置实验室危险废物。\n\n7.19.4 应有对危险废物处理和处置的政策和程序，包括对排放标准及监测的规定。\n\n7.19.5 应评估和避免危险废物处理和处置方法本身的风险。\n\n7.19.6 应根据危险废物的性质和危险性按相关标准分类处理和处置废物。",
-    "role": "emergency",
+    "role": "regulation",
     "role_confidence": 2,
     "block_id": "通用安全.md_block97",
     "source_file": "通用安全.md",
@@ -3747,12 +3747,12 @@
     "start_line": 629,
     "end_line": 632,
     "token_estimate": 173,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block97_chunk2",
     "content": "7 管理要求 > 7.19 废物处置\n7.19.7 危险废物应弃置于专门设计的、专用的和有标识的用于处置危险废物的容器内，装量不能超过建议的装载容量。\n\n7.19.8 锐器（包括针头、小刀、金属和玻璃等）应直接弃置于耐扎的容器内。\n\n7.19.9 应由经过培训的人员处理危险废物，并应穿戴适当的个体防护装备。",
-    "role": "emergency",
+    "role": "regulation",
     "role_confidence": 0,
     "block_id": "通用安全.md_block97",
     "source_file": "通用安全.md",
@@ -3764,7 +3764,7 @@
     "start_line": 633,
     "end_line": 635,
     "token_estimate": 169,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block97_chunk3",
@@ -3781,7 +3781,7 @@
     "start_line": 636,
     "end_line": 638,
     "token_estimate": 151,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block97_chunk4",
@@ -3900,7 +3900,7 @@
     "start_line": 651,
     "end_line": 651,
     "token_estimate": 46,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   },
   {
     "chunk_id": "通用安全.md_block100_chunk0",
@@ -4007,7 +4007,7 @@
   {
     "chunk_id": "通用安全.md_block101_chunk1",
     "content": "7 管理要求 > 7.23 事故报告\n7.23.3 事故报告（包括采取的任何措施）应提交实验室管理层和安全委员会评审，适用时，还应提交更高管理层评审。\n\n7.23.4 实验室任何人员不得隐瞒实验室活动相关的事件、伤害、事故、职业相关疾病以及潜在危险，应按国家规定上报。",
-    "role": "emergency",
+    "role": "regulation",
     "role_confidence": 0,
     "block_id": "通用安全.md_block101",
     "source_file": "通用安全.md",
@@ -4019,6 +4019,6 @@
     "start_line": 673,
     "end_line": 674,
     "token_estimate": 151,
-    "tagged_by": "rule"
+    "tagged_by": "llm"
   }
 ]

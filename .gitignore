@@ -36,3 +36,4 @@ share/python-wheels/
 # IDE / OS
 .DS_Store
 Thumbs.db
+.db
