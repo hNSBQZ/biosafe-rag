@@ -45,15 +45,20 @@ class LLMClient:
         messages: List[Dict[str, str]],
         max_tokens: int = 256,
         temperature: float = 0.0,
+        extra_body: Optional[Dict] = None,
     ) -> str:
         """单次对话，返回 assistant 回复文本"""
-        resp = self._client.chat.completions.create(
+        kwargs = dict(
             model=self.profile.model,
             messages=messages,
             max_tokens=max_tokens,
             temperature=temperature,
         )
-        return resp.choices[0].message.content.strip()
+        if extra_body:
+            kwargs["extra_body"] = extra_body
+        resp = self._client.chat.completions.create(**kwargs)
+        content = resp.choices[0].message.content
+        return content.strip() if content else ""
 
     def batch_chat(
         self,
