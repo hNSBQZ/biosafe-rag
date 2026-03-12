@@ -112,6 +112,13 @@ def test_insert_role_result_with_embedding_to_milvus(
             topn = len(bm25_hits[0]) if bm25_hits else 0
             print(f"BM25 查询: {bm25_query}")
             print(f"BM25 返回条数: {topn}")
+            for i, hit in enumerate(bm25_hits[0] if bm25_hits else []):
+                print(f"\n  [{i+1}] score={hit.get('distance', 'N/A'):.4f}"
+                      f"  role={hit.get('entity', {}).get('role', '?')}"
+                      f"  chunk_id={hit.get('entity', {}).get('chunk_id', '?')}")
+                content = hit.get("entity", {}).get("content", "")
+                preview = content[:120].replace("\n", " ")
+                print(f"      {preview}...")
         else:
             print("BM25 查询已跳过（未启用 BM25）")
 

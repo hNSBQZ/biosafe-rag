@@ -127,7 +127,7 @@ def keyword_role_classify(query: str, top_k: int = 2) -> List[str]:
 
     scores = score_role(query, heading_path="")
     ranked = sorted(scores.items(), key=lambda x: -x[1])
-    return [role for role, _ in ranked[:top_k]]
+    return [role for role, _ in ranked if role != "junk"][:top_k]
 
 
 if __name__ == "__main__":

@@ -64,6 +64,29 @@ NOISE_PATTERNS = [
     r'^Active Protein Solutions\s*$',
 ]
 
+# 尾部低价值区段的标题匹配模式（匹配到后，后续所有行标记为 tail_section）
+TAIL_SECTION_PATTERNS = [
+    r'^#+\s*【?参考文献】?',
+    r'^#+\s*【?基本信息】?',
+    r'^#+\s*【?标识的解释】?',
+    r'^参考文献\s*$',
+]
+
+# 企业模板 / 产品头尾固定文本
+BOILERPLATE_PATTERNS = [
+    r'^产品使用说明书\s*$',
+    r'^.+Biotech\s+Co\.,?\s*Ltd\.?\s*$',
+    r'^版本号[:：].*$',
+    r'^.+备案凭证编号.*$',
+    r'^.+说明书核准日期.*$',
+    r'^.+生产日期及失效日期.*$',
+    r'^第\s*\d+\s*页\s*共\s*\d+\s*页\s*$',
+    r'^售后服务电话[:：].*$',
+]
+
+# 连续纯图片行达到此阈值则整块标记为噪声
+CONSECUTIVE_IMAGE_THRESHOLD = 3
+
 
 # ============================================================
 #  数据结构
@@ -80,6 +103,8 @@ class ParsedLine:
     is_noise: bool        # 是否为噪声行
     is_table: bool        # 是否为表格行
     is_empty: bool        # 是否为空行
+    is_image: bool = False       # 是否为纯 markdown 图片链接行
+    is_tail_section: bool = False  # 是否属于尾部低价值区段（参考文献等）
 
 
 @dataclass
@@ -147,6 +172,26 @@ def is_noise_line(line: str) -> bool:
     if not stripped:
         return False
     return any(re.match(p, stripped, re.IGNORECASE) for p in NOISE_PATTERNS)
+
+
+def is_image_line(line: str) -> bool:
+    """判断是否为纯 markdown 图片链接行"""
+    stripped = line.strip()
+    return bool(re.match(r'^!\[.*?\]\(.*?\)\s*$', stripped))
+
+
+def is_tail_section_start(line: str) -> bool:
+    """判断是否为尾部低价值区段的起始标题"""
+    stripped = line.strip()
+    return any(re.match(p, stripped) for p in TAIL_SECTION_PATTERNS)
+
+
+def is_boilerplate_line(line: str) -> bool:
+    """判断是否为企业模板/产品固定文本"""
+    stripped = line.strip()
+    if not stripped:
+        return False
+    return any(re.match(p, stripped, re.IGNORECASE) for p in BOILERPLATE_PATTERNS)
 
 
 def is_table_line(line: str) -> bool:
@@ -226,20 +271,39 @@ def detect_heading(line: str) -> Tuple[int, str]:
 
 
 def parse_document(lines: List[str]) -> List[ParsedLine]:
-    """将文档的原始行列表解析为结构化的 ParsedLine 列表"""
+    """将文档的原始行列表解析为结构化的 ParsedLine 列表
+
+    包含三轮标记：
+      1. 逐行基础解析（噪声、表格、图片、标题等）
+      2. 尾部区段检测（参考文献标题之后的行全部标 noise）
+      3. 连续纯图片行检测（>= CONSECUTIVE_IMAGE_THRESHOLD 行的连续图片块标 noise）
+    """
     parsed = []
+    in_tail_section = False
+
     for i, line in enumerate(lines):
         raw = line.rstrip('\n')
         is_empty = not raw.strip()
         noise = is_noise_line(raw)
         table = is_table_line(raw)
+        image = False if (noise or table or is_empty) else is_image_line(raw)
+        boilerplate = False if (noise or table or is_empty) else is_boilerplate_line(raw)
 
-        if noise or table or is_empty:
+        if boilerplate:
+            noise = True
+
+        if noise or table or is_empty or image:
             cleaned = ''
             heading_level, heading_title = 0, ""
         else:
             cleaned = clean_line(raw)
             heading_level, heading_title = detect_heading(cleaned)
+
+        # 尾部区段检测：遇到尾部标题后，后续所有行标为 noise
+        if not in_tail_section and is_tail_section_start(raw):
+            in_tail_section = True
+        if in_tail_section:
+            noise = True
 
         parsed.append(ParsedLine(
             line_no=i + 1,
@@ -250,8 +314,33 @@ def parse_document(lines: List[str]) -> List[ParsedLine]:
             is_noise=noise,
             is_table=table,
             is_empty=is_empty,
+            is_image=image,
+            is_tail_section=in_tail_section,
         ))
+
+    # 第三轮：连续纯图片行批量标噪声
+    _mark_consecutive_image_noise(parsed)
+
     return parsed
+
+
+def _mark_consecutive_image_noise(parsed: List[ParsedLine]) -> None:
+    """将连续 >= CONSECUTIVE_IMAGE_THRESHOLD 行的纯图片块标记为噪声"""
+    i = 0
+    while i < len(parsed):
+        if parsed[i].is_image and not parsed[i].is_noise:
+            run_start = i
+            while i < len(parsed) and (parsed[i].is_image or parsed[i].is_empty):
+                i += 1
+            image_count = sum(
+                1 for p in parsed[run_start:i] if p.is_image
+            )
+            if image_count >= CONSECUTIVE_IMAGE_THRESHOLD:
+                for p in parsed[run_start:i]:
+                    if p.is_image:
+                        p.is_noise = True
+        else:
+            i += 1
 
 
 # ============================================================
@@ -1120,7 +1209,7 @@ if __name__ == '__main__':
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 
     SKIP_FILES: set = {
-        "catolog.md",
+        
     }
 
     doc_dir = Path(__file__).parent / 'doc'

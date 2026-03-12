@@ -144,6 +144,17 @@ ROLE_KEYWORDS: Dict[str, List[Tuple[str, int]]] = {
         ("会议", 2), ("签到", 2), ("报名", 2),
         ("年度", 1), ("季度", 1),
     ],
+    "junk": [
+        # -- 参考文献 / 引用 --
+        ("参考文献", 5), ("引用", 2),
+        # -- 企业/备案信息 --
+        ("备案凭证", 4), ("备案", 3),
+        ("说明书核准", 4), ("版本号", 3),
+        ("生产企业", 3), ("售后服务", 3),
+        # -- 产品模板 --
+        ("体外诊断", 2), ("产品使用说明书", 4),
+        ("版权所有", 3), ("保留所有权利", 3),
+    ],
 }
 
 HEADING_KEYWORDS: Dict[str, List[Tuple[str, int]]] = {
@@ -172,6 +183,9 @@ HEADING_KEYWORDS: Dict[str, List[Tuple[str, int]]] = {
     ],
     "notice": [
         ("通知", 5), ("公告", 4), ("培训", 3),
+    ],
+    "junk": [
+        ("参考文献", 5), ("标识的解释", 5), ("基本信息", 4),
     ],
 }
 
@@ -230,6 +244,47 @@ def _score_structure(text: str) -> Dict[str, int]:
         bonuses["regulation"] = bonuses.get("regulation", 0) + 1
 
     return bonuses
+
+
+# ==================================================================
+#  Junk 内容检测（基于规则的质量过滤，独立于关键词打分）
+# ==================================================================
+
+_IMAGE_LINE_RE = re.compile(r'!\[.*?\]\(')
+
+
+def _is_junk_chunk(text: str) -> Tuple[bool, str]:
+    """判断 chunk 内容是否为低价值噪声
+
+    Returns
+    -------
+    (is_junk, reason)
+        reason 取值: "image_only" / "too_short" / "reference_section" / ""
+    """
+    lines = text.strip().split('\n')
+    non_empty = [line for line in lines if line.strip()]
+
+    if not non_empty:
+        return True, "empty"
+
+    # 规则1: 图片占比 > 80%
+    image_lines = [line for line in non_empty if _IMAGE_LINE_RE.match(line.strip())]
+    if len(image_lines) / len(non_empty) > 0.8:
+        return True, "image_only"
+
+    # 规则2: 有效文字过少（去掉图片链接和 URL 后 < 20 字）
+    clean_text = re.sub(r'!\[.*?\]\(.*?\)', '', text)
+    clean_text = re.sub(r'https?://\S+', '', clean_text)
+    clean_text = re.sub(r'\s+', '', clean_text)
+    if len(clean_text) < 20:
+        return True, "too_short"
+
+    # 规则3: 参考文献条目（多行 [数字] Author... 格式）
+    ref_lines = [line for line in non_empty if re.match(r'^\[?\d+\]', line.strip())]
+    if len(ref_lines) >= 2 and len(ref_lines) / len(non_empty) > 0.5:
+        return True, "reference_section"
+
+    return False, ""
 
 
 # ==================================================================
@@ -390,12 +445,20 @@ class ChunkProcessor:
     ) -> Tuple[str, int]:
         """对单个 chunk 的 role 进行关键词打分
 
+        流程：先做 junk 质量检测（规则硬判），再走常规关键词打分。
+        如果 _is_junk_chunk() 命中，给 junk 加 20 分保证它胜出。
+
         Returns
         -------
         (best_role, confidence)
             confidence = top1_score - top2_score
         """
         scores: Dict[str, int] = {r: 0 for r in self.config.roles}
+
+        # 质量检测优先：确定性 junk 直接加高分
+        is_junk, junk_reason = _is_junk_chunk(text)
+        if is_junk:
+            scores["junk"] += 20
 
         for role, keywords in ROLE_KEYWORDS.items():
             for kw, weight in keywords:
@@ -551,10 +614,15 @@ def score_role(text: str, heading_path: str, source_file: str = "") -> Dict[str,
     """独立的关键词打分函数，返回所有 role 的分数 dict
 
     供 Query 侧 keyword_role_classify 复用。
+    包含 junk 质量检测逻辑。
     """
     from config import AppConfig
     dummy_config = AppConfig()
     scores: Dict[str, int] = {r: 0 for r in dummy_config.roles}
+
+    is_junk, _ = _is_junk_chunk(text)
+    if is_junk:
+        scores["junk"] += 20
 
     for role, keywords in ROLE_KEYWORDS.items():
         for kw, weight in keywords:

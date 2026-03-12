@@ -40,7 +40,7 @@ class MilvusConfig:
     embedding_dim: int = 1024
     metric_type: str = "COSINE"
     token: str = ""
-    enable_bm25: bool = False
+    enable_bm25: bool = True
     bm25_input_field: str = "content"
     bm25_output_field: str = "sparse"
     bm25_index_algo: str = "DAAT_MAXSCORE"
@@ -67,6 +67,7 @@ class AppConfig:
     roles: Tuple[str, ...] = (
         "sop", "emergency", "regulation", "directory",
         "knowledge", "equipment", "reagent", "notice",
+        "junk",
     )
 
     prompts: Dict[str, str] = field(default_factory=dict)
@@ -80,7 +81,18 @@ DEFAULT_PROMPTS: Dict[str, str] = {
     "role_tagging": (
         "请判断以下文本片段最适合归入哪个知识类别。只返回一个类别名称。\n\n"
         "类别：sop / emergency / regulation / directory / "
-        "knowledge / equipment / reagent / notice\n\n"
+        "knowledge / equipment / reagent / notice / junk\n\n"
+        "各类别说明：\n"
+        "- sop: 标准操作规程、实验步骤、操作流程\n"
+        "- emergency: 应急预案、事故处置\n"
+        "- regulation: 法规、管理制度、合规要求\n"
+        "- directory: 名录、清单、分类目录\n"
+        "- knowledge: 知识原理、概念定义、术语解释\n"
+        "- equipment: 设备仪器的使用与管理\n"
+        "- reagent: 试剂药品、安全数据表\n"
+        "- notice: 通知公告、培训安排\n"
+        "- junk: 低价值/无意义内容，如纯图片链接堆砌、参考文献条目、企业备案信息、"
+        "版权声明、页码页眉、产品说明书模板文本等，对生物安全问答没有实质帮助的内容\n\n"
         "文本片段的层级路径：{heading_path}\n"
         "文本内容：\n{chunk_text}\n\n"
         "类别："
@@ -150,7 +162,7 @@ def load_config(env_path: str = ".env") -> AppConfig:
         embedding_dim=int(env.get("MILVUS_EMBEDDING_DIM", "1024")),
         metric_type=env.get("MILVUS_METRIC_TYPE", "COSINE"),
         token=env.get("MILVUS_TOKEN", ""),
-        enable_bm25=_as_bool(env.get("MILVUS_ENABLE_BM25", "false")),
+        enable_bm25=_as_bool(env.get("MILVUS_ENABLE_BM25", "true")),
         bm25_input_field=env.get("MILVUS_BM25_INPUT_FIELD", "content"),
         bm25_output_field=env.get("MILVUS_BM25_OUTPUT_FIELD", "sparse"),
         bm25_index_algo=env.get("MILVUS_BM25_INDEX_ALGO", "DAAT_MAXSCORE"),

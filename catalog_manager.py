@@ -256,20 +256,28 @@ class CatalogManager:
         1. PATHOGEN 分支：模糊查名录 → 注入正式名 + BSL 等级
         2. EQUIPMENT 分支：暂无设备名录，跳过
         3. 拼接 slots.query
+
+        当 roles 包含 directory 时跳过 BSL 注入——名录查询本身就是
+        要查分类信息，不需要用 BSL 等级缩窄检索范围。
         """
         parts: List[str] = []
+        skip_bsl = "directory" in slots.roles
 
         # ── 分支 A：PATHOGEN → 模糊查名录 → 注入 BSL 等级 ──
         if slots.pathogen:
             match = self.fuzzy_lookup(slots.pathogen)
             if match:
                 parts.append(match.cn_name)
-                lab_level = self.resolve_lab_level(match, slots.activity)
-                if lab_level:
-                    parts.append(lab_level)
+                if not skip_bsl:
+                    lab_level = self.resolve_lab_level(match, slots.activity)
+                    if lab_level:
+                        parts.append(lab_level)
+                else:
+                    lab_level = None
                 logger.info(
-                    "名录命中: '%s' → %s (%s) | BSL=%s",
+                    "名录命中: '%s' → %s (%s) | BSL=%s%s",
                     slots.pathogen, match.cn_name, match.hazard_class, lab_level,
+                    " (directory, 跳过BSL注入)" if skip_bsl else "",
                 )
             else:
                 logger.info("名录未命中: '%s'", slots.pathogen)
