@@ -15,6 +15,7 @@ from typing import Dict, List, Optional
 from experiment_store import ExperimentStore
 from funcall_detector import detect_funcall
 from llm_client import LLMClient
+from retriever import Retriever
 from slot_parser import LLMSlots, parse_llm_output, keyword_role_classify
 from catalog_manager import CatalogManager
 
@@ -29,10 +30,12 @@ class QueryHandler:
         llm_client: LLMClient,
         experiment_store: ExperimentStore,
         catalog_manager: Optional[CatalogManager] = None,
+        retriever: Optional[Retriever] = None,
     ):
         self._llm = llm_client
         self._experiments = experiment_store
         self._catalog = catalog_manager
+        self._retriever = retriever
 
     def handle(
         self,
@@ -107,15 +110,43 @@ class QueryHandler:
             search_query = self._catalog.enhance_query(slots)
             logger.info("增强后检索 query: %s", search_query)
 
-        # ── Step 6: (后续) RAG 检索 + LLM 第二轮 ──
-        # TODO: 接入 retriever.search() + LLM 第二轮调用
+        # ── Step 6: RAG 检索 ──
+        if not self._retriever:
+            logger.warning("Retriever 未配置，跳过 RAG 检索")
+            return {
+                "type": "need_rag",
+                "roles": slots.roles,
+                "search_query": search_query,
+                "raw_llm_output": llm_output,
+                "experiment_id": experiment_id,
+            }
+
+        chunks = self._retriever.search(
+            query=query,
+            roles=slots.roles,
+            top_k=8,
+            enhanced_query=search_query,
+        )
+        if not chunks:
+            logger.warning("RAG 召回为空，返回第一轮 LLM 输出兜底")
+            return {
+                "type": "direct",
+                "content": slots.answer or llm_output,
+                "experiment_id": experiment_id,
+                "fallback": True,
+            }
+
+        logger.info("RAG 召回 %d 条 chunk", len(chunks))
+
+        # ── Step 7: (后续) LLM 第二轮增强回答 ──
+        # TODO: 将 chunks 拼为上下文，调 LLM 第二轮生成最终回答
+        rag_context = "\n\n---\n\n".join(c["content"] for c in chunks)
         return {
-            "type": "need_rag",
+            "type": "rag",
             "roles": slots.roles,
-            "pathogen": slots.pathogen,
-            "activity": slots.activity,
-            "equipment": slots.equipment,
             "search_query": search_query,
+            "rag_context": rag_context,
+            "sources": [c["chunk_id"] for c in chunks],
             "raw_llm_output": llm_output,
             "experiment_id": experiment_id,
         }
@@ -126,9 +157,10 @@ class QueryHandler:
 # ------------------------------------------------------------------
 
 def main():
-    """命令行交互式测试：完整链路（FuncCall → LLM → 槽位解析 → 名录查表）"""
+    """命令行交互式测试：完整链路（FuncCall → LLM → 槽位解析 → 名录查表 → RAG 检索）"""
     import sys
     from config import load_config
+    from milvus_manager import MilvusManager
 
     logging.basicConfig(
         level=logging.INFO,
@@ -145,6 +177,16 @@ def main():
     store = ExperimentStore("experiments")
     catalog = CatalogManager("table.json")
 
+    retriever = None
+    if "embedding" in config.llm_profiles:
+        emb_client = LLMClient(config.llm_profiles["embedding"])
+        milvus_mgr = MilvusManager(config.milvus)
+        milvus_mgr.connect()
+        retriever = Retriever(milvus_manager=milvus_mgr, embedding_client=emb_client)
+        print("Retriever 已初始化 (Hybrid: Dense + BM25)")
+    else:
+        print("警告: 未配置 embedding profile，跳过 RAG 检索")
+
     print(f"\n名录已加载: {catalog.size} 条记录")
     print("\n可用实验:")
     for eid, title in sorted(store.list_experiments().items()):
@@ -154,6 +196,7 @@ def main():
         llm_client=llm,
         experiment_store=store,
         catalog_manager=catalog,
+        retriever=retriever,
     )
 
     # ── 测试用例 ──

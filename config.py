@@ -52,7 +52,7 @@ class MilvusConfig:
 class BatchConfig:
     """Batch API 调用参数"""
     poll_interval: int = 15
-    max_wait: int = 7200
+    max_wait: int = 86400
     endpoint: str = "/v1/chat/completions"
 
 
@@ -104,7 +104,7 @@ DEFAULT_PROMPTS: Dict[str, str] = {
 #  加载逻辑
 # ------------------------------------------------------------------
 
-_PROFILE_NAMES = ("tagging", "embedding", "chat")
+_PROFILE_NAMES = ("tagging", "embedding", "embedding_batch", "chat")
 
 
 def _load_env(env_path: str) -> Dict[str, str]:
@@ -172,7 +172,7 @@ def load_config(env_path: str = ".env") -> AppConfig:
 
     batch = BatchConfig(
         poll_interval=int(env.get("BATCH_POLL_INTERVAL", "15")),
-        max_wait=int(env.get("BATCH_MAX_WAIT", "7200")),
+        max_wait=int(env.get("BATCH_MAX_WAIT", "86400")),
         endpoint=env.get("BATCH_ENDPOINT", "/v1/chat/completions"),
     )
 

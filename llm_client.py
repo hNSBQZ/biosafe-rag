@@ -86,14 +86,14 @@ class LLMClient:
     # ----------------------------------------------------------
 
     def get_embeddings(self, texts: List[str]) -> List[List[float]]:
-        """批量获取 embedding 向量"""
-        # TODO: 实现 embedding 调用，接口参考：
-        #   resp = self._client.embeddings.create(
-        #       model=self.profile.model,
-        #       input=texts,
-        #   )
-        #   return [item.embedding for item in resp.data]
-        pass
+        """批量获取 embedding 向量（在线同步调用，适用于少量文本如检索 query）"""
+        if not texts:
+            return []
+        resp = self._client.embeddings.create(
+            model=self.profile.model,
+            input=texts,
+        )
+        return [item.embedding for item in resp.data]
 
     # ----------------------------------------------------------
     #  工具方法
@@ -225,14 +225,21 @@ class BatchTagClient:
             completed = getattr(batch.request_counts, "completed", "?")
             failed = getattr(batch.request_counts, "failed", "?")
             total = getattr(batch.request_counts, "total", "?")
-            logger.info(
-                "[轮询 #%d] Batch %s | 状态: %s | 进度: %s/%s 完成, %s 失败 | 已等待 %ds",
-                poll_count, batch_id, status, completed, total, failed, elapsed,
-            )
+
+            log_interval = 1800  # 每 30 分钟打一次详细日志
+            should_log = (poll_count == 1
+                          or elapsed % log_interval < self.batch_config.poll_interval
+                          or status in ("completed", "failed", "expired", "cancelled"))
+            if should_log:
+                logger.info(
+                    "[轮询 #%d] Batch %s | 状态: %s | 进度: %s/%s 完成, %s 失败 | 已等待 %ds (%.1fh)",
+                    poll_count, batch_id, status, completed, total, failed,
+                    elapsed, elapsed / 3600,
+                )
 
             if status == "completed":
-                logger.info("Batch %s 已完成 (共轮询 %d 次, 耗时 %ds)",
-                            batch_id, poll_count, elapsed)
+                logger.info("Batch %s 已完成 (共轮询 %d 次, 耗时 %ds / %.1fh)",
+                            batch_id, poll_count, elapsed, elapsed / 3600)
                 return
             if status in ("failed", "expired", "cancelled"):
                 raise RuntimeError(

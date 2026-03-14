@@ -1,10 +1,14 @@
 """
 将 Batch LLM 打标结果回填到 role_result.json。
 
+支持 role 包含 junk（与 config.roles / chunk_processor 一致）。
+低置信度列表与 chunk_processor 一致：按 role_result 顺序收集所有
+role_confidence < threshold 的项，与 batch 的 custom_id 一一对应。
+
 用法示例:
-    python unit_test/merge_batch_roles.py \
+    python merge_batch_roles.py \
       --role-file role_result.json \
-      --batch-file unit_test/file-batch_output-8ca20cd24ba64e57b5e1c8d4.jsonl \
+      --batch-file batch_tag_results.jsonl \
       --out-file role_result_merged.json
 """
 
@@ -17,6 +21,7 @@ from typing import Dict, List, Optional, Tuple
 VALID_ROLES = {
     "sop", "emergency", "regulation", "directory",
     "knowledge", "equipment", "reagent", "notice",
+    "junk",
 }
 
 
@@ -77,13 +82,13 @@ def load_batch_results(batch_file: str) -> Dict[int, str]:
 def pick_low_confidence_indices(
     records: List[dict],
     threshold: int,
-    only_rule: bool,
 ) -> List[int]:
     """
     找出待 LLM 回填的条目在 role_result 中的下标。
 
     需与 chunk_processor 的 low_confidence 顺序一致：
-    即按 role_result 的原始顺序扫描，收集低置信度项。
+    按 role_result 的原始顺序扫描，收集所有 role_confidence < threshold 的项
+    （不区分 tagged_by），以便 batch 的 custom_id 与下标一一对应。
     """
     indices: List[int] = []
     for idx, rec in enumerate(records):
@@ -91,8 +96,6 @@ def pick_low_confidence_indices(
         if not isinstance(conf, int):
             continue
         if conf >= threshold:
-            continue
-        if only_rule and rec.get("tagged_by", "rule") != "rule":
             continue
         indices.append(idx)
     return indices
@@ -125,11 +128,6 @@ def main() -> None:
     parser.add_argument("--batch-file", required=True, help="Batch 输出 JSONL 路径")
     parser.add_argument("--out-file", default="", help="输出文件路径，默认覆盖 role_file")
     parser.add_argument("--threshold", type=int, default=3, help="低置信度阈值，默认 3")
-    parser.add_argument(
-        "--include-non-rule",
-        action="store_true",
-        help="默认仅回填 tagged_by=rule 的低置信项；开启后包含其他 tagged_by",
-    )
     args = parser.parse_args()
 
     with open(args.role_file, "r", encoding="utf-8") as f:
@@ -137,11 +135,9 @@ def main() -> None:
     if not isinstance(records, list):
         raise ValueError("role_file 内容应为 JSON 数组")
 
-    only_rule = not args.include_non_rule
     low_indices = pick_low_confidence_indices(
         records=records,
         threshold=args.threshold,
-        only_rule=only_rule,
     )
     batch_roles = load_batch_results(args.batch_file)
 

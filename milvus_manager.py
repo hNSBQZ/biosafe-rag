@@ -245,7 +245,7 @@ class MilvusManager:
         if output_fields is None:
             output_fields = [
                 "chunk_id", "content", "role", "source_file",
-                "heading_path", "role_confidence",
+                "heading_path", "block_id", "role_confidence",
             ]
         output_fields = self._sanitize_output_fields(output_fields)
 
@@ -285,7 +285,7 @@ class MilvusManager:
         if output_fields is None:
             output_fields = [
                 "chunk_id", "content", "role", "source_file",
-                "heading_path", "role_confidence",
+                "heading_path", "block_id", "role_confidence",
             ]
         output_fields = self._sanitize_output_fields(output_fields)
 

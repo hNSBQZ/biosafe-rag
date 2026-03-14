@@ -4,12 +4,20 @@
 默认读取项目根目录的 role_result.json，输出到 unit_test/role_result_with_embedding.json。
 
 运行方式：
-    python unit_test/test_embed_role_result.py
+    python test_embed_role_result.py
 """
 
 import json
+import logging
 from pathlib import Path
 from typing import List
+
+# 开启中途日志，便于查看上传、轮询、下载等进度
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    datefmt="%H:%M:%S",
+)
 
 from chunk_processor import ChunkProcessor, TaggedChunk
 from config import load_config
@@ -64,10 +72,12 @@ def test_embed_all_role_result(
     if not tagged_chunks:
         raise ValueError("role_result.json 为空或无有效记录")
 
+    print(f"已加载 {len(tagged_chunks)} 条 chunk，开始 Batch Embedding ...")
     emb_client = BatchEmbeddingClient(config.llm_profiles["embedding"], config.batch)
     processor = ChunkProcessor(config=config, emb_client=emb_client, use_llm=False)
 
     embeddings = processor.embed_chunks(tagged_chunks)
+    print("Embedding 请求已完成，正在写结果文件 ...")
     valid_count = sum(1 for e in embeddings if e)
 
     records = processor.to_milvus_records(tagged_chunks, embeddings=embeddings)
