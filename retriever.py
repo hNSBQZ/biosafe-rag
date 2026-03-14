@@ -25,7 +25,7 @@ _OUTPUT_FIELDS = [
 
 
 class Retriever:
-    """Hybrid RAG 检索（Dense + BM25）"""
+    """Hybrid RAG 检索（Dense + BM25）+ 块级升格"""
 
     def __init__(
         self,
@@ -33,11 +33,15 @@ class Retriever:
         embedding_client,
         dense_weight: float = 0.4,
         bm25_weight: float = 0.6,
+        enable_promotion: bool = True,
+        max_block_tokens: int = 2000,
     ):
         self._milvus = milvus_manager
         self._emb_client = embedding_client
         self._dense_weight = dense_weight
         self._bm25_weight = bm25_weight
+        self._enable_promotion = enable_promotion
+        self._max_block_tokens = max_block_tokens
 
     def search(
         self,
@@ -93,11 +97,16 @@ class Retriever:
                     all_hits[cid] = hit
 
         results = sorted(all_hits.values(), key=lambda x: x["score"], reverse=True)
+        results = results[:top_k]
+
+        if self._enable_promotion:
+            results = self._promote_blocks(results)
+
         logger.info(
-            "Hybrid 检索完成 | roles=%s | 去重后=%d | 返回 top_%d",
-            roles, len(results), top_k,
+            "Hybrid 检索完成 | roles=%s | 去重后=%d | 返回=%d",
+            roles, len(all_hits), len(results),
         )
-        return results[:top_k]
+        return results
 
     # ----------------------------------------------------------
     #  Embedding
@@ -179,6 +188,88 @@ class Retriever:
 
         results.sort(key=lambda x: x["score"], reverse=True)
         return results
+
+    # ----------------------------------------------------------
+    #  块级升格 (Block Promotion)
+    # ----------------------------------------------------------
+
+    def _promote_blocks(self, results: List[Dict]) -> List[Dict]:
+        """块级升格：召回的 chunk 所属 block 若 role 一致，则升格为整块
+
+        条件同时满足才升格：
+          1. block 内所有 chunk 的 role 与被召回 chunk 一致
+          2. block 总 token 不超过阈值（防止超大块吃掉上下文窗口）
+          3. block 至少包含 2 个 chunk（单 chunk block 无需升格）
+        """
+        block_ids = {
+            h["block_id"] for h in results
+            if h.get("block_id")
+        }
+        if not block_ids:
+            return results
+
+        block_chunks = self._fetch_block_chunks(block_ids)
+
+        promotable = set()
+        for bid, chunks in block_chunks.items():
+            if len(chunks) < 2:
+                continue
+            roles = {c.get("role", "") for c in chunks}
+            total_tokens = sum(c.get("token_estimate", 0) for c in chunks)
+            if len(roles) == 1 and total_tokens <= self._max_block_tokens:
+                promotable.add(bid)
+
+        if not promotable:
+            return results
+
+        promoted: List[Dict] = []
+        seen_blocks: set = set()
+
+        for hit in results:
+            bid = hit.get("block_id", "")
+            if bid in promotable:
+                if bid in seen_blocks:
+                    continue
+                seen_blocks.add(bid)
+                chunks = block_chunks[bid]
+                promoted_content = "\n\n".join(
+                    c.get("content", "") for c in chunks
+                )
+                entry = dict(hit)
+                entry["content"] = promoted_content
+                entry["promoted"] = True
+                entry["chunk_count"] = len(chunks)
+                entry["chunk_ids"] = [c.get("chunk_id", "") for c in chunks]
+                promoted.append(entry)
+                logger.info(
+                    "Block 升格: %s (%d chunks, role=%s)",
+                    bid, len(chunks), hit.get("role"),
+                )
+            else:
+                promoted.append(hit)
+
+        return promoted
+
+    def _fetch_block_chunks(
+        self, block_ids: set
+    ) -> Dict[str, List[Dict]]:
+        """批量查询多个 block 的全部 chunk，按文档顺序排列"""
+        if len(block_ids) == 1:
+            bid = next(iter(block_ids))
+            expr = f'block_id == "{bid}"'
+        else:
+            ids_str = ", ".join(f'"{bid}"' for bid in block_ids)
+            expr = f"block_id in [{ids_str}]"
+
+        rows = self._milvus.query_by_filter(expr)
+
+        groups: Dict[str, List[Dict]] = {}
+        for row in rows:
+            bid = row.get("block_id", "")
+            groups.setdefault(bid, []).append(row)
+        for chunks in groups.values():
+            chunks.sort(key=lambda c: c.get("start_line", 0))
+        return groups
 
     # ----------------------------------------------------------
     #  工具方法

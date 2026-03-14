@@ -318,6 +318,37 @@ class MilvusManager:
             logger.warning("output_fields 包含 '%s'，已自动移除以避免 Milvus 报错", sparse)
         return cleaned
 
+    def query_by_filter(
+        self,
+        filter_expr: str,
+        output_fields: Optional[List[str]] = None,
+        limit: int = 200,
+    ) -> List[Dict]:
+        """按条件查询记录（非向量检索，用于块级升格等场景）
+
+        Parameters
+        ----------
+        filter_expr : str
+            Milvus 过滤表达式，如 'block_id == "doc1_block3"'
+        output_fields : list[str], optional
+            返回的字段列表
+        limit : int
+            最大返回条数
+        """
+        if output_fields is None:
+            output_fields = [
+                "chunk_id", "content", "role", "block_id",
+                "start_line", "token_estimate",
+            ]
+        output_fields = self._sanitize_output_fields(output_fields)
+        results = self.client.query(
+            collection_name=self.config.collection_name,
+            filter=filter_expr,
+            output_fields=output_fields,
+            limit=limit,
+        )
+        return results
+
     def count(self) -> int:
         """返回 Collection 中的记录总数"""
         name = self.config.collection_name
