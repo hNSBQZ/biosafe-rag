@@ -7,9 +7,11 @@ Hybrid 检索（Dense + BM25），按 role 过滤，RRF 融合去重。
   - Dense 用原始 query（语义向量不适合拼接 BSL 等级等关键词噪声）
   - BM25 用增强后的 query（注入了实体名 + BSL 等级，BM25 天然利于关键词匹配）
   - RRF 融合时 BM25 权重 > Dense 权重（本场景面包屑关键词匹配贡献大）
+  - 升格后按 token 预算贪心填充，放不下的升格 block 降级为原始 chunk
 """
 
 import logging
+import re
 from typing import Dict, List, Optional
 
 from milvus_manager import MilvusManager
@@ -35,6 +37,7 @@ class Retriever:
         bm25_weight: float = 0.6,
         enable_promotion: bool = True,
         max_block_tokens: int = 2000,
+        max_context_tokens: int = 10000,
     ):
         self._milvus = milvus_manager
         self._emb_client = embedding_client
@@ -42,18 +45,20 @@ class Retriever:
         self._bm25_weight = bm25_weight
         self._enable_promotion = enable_promotion
         self._max_block_tokens = max_block_tokens
+        self._max_context_tokens = max_context_tokens
 
     def search(
         self,
         query: str,
         roles: List[str],
-        top_k: int = 8,
+        top_k: int = 12,
         enhanced_query: Optional[str] = None,
         per_role_k: int = 0,
     ) -> List[Dict]:
-        """Hybrid 检索 + 按 roles 过滤 + RRF 融合去重
+        """Hybrid 检索 + 按 roles 过滤 + RRF 融合去重 + token 预算裁剪
 
         对每个 role 分别做 dense + bm25，RRF 融合后合并所有 role 的结果。
+        升格后按 max_context_tokens 预算贪心填充，放不下的升格 block 降级。
 
         Parameters
         ----------
@@ -62,7 +67,7 @@ class Retriever:
         roles : List[str]
             需要检索的 role 列表
         top_k : int
-            最终返回的 chunk 数量
+            候选池大小（升格+预算裁剪前），最终数量由 token 预算决定
         enhanced_query : str, optional
             增强后的 query（注入了 BSL 等级/实体名，用于 BM25）。
             为 None 时 BM25 也用原始 query。
@@ -102,6 +107,22 @@ class Retriever:
         if self._enable_promotion:
             results = self._promote_blocks(results)
 
+        results = self._apply_token_budget(results)
+
+        logger.debug(
+            "最终结果 (%d 条):\n%s",
+            len(results),
+            "\n".join(
+                f"  [{i+1}] score={r.get('score', 0):.6f} "
+                f"chunk={r['chunk_id']} "
+                f"promoted={'Y' if r.get('promoted') else 'N'}"
+                f"{' demoted' if r.get('demoted') else ''}"
+                f"{' ('+str(r.get('chunk_count',''))+'chunks)' if r.get('promoted') else ''} "
+                f"~{self._estimate_tokens(r.get('content', ''))}tok"
+                for i, r in enumerate(results)
+            ),
+        )
+
         logger.info(
             "Hybrid 检索完成 | roles=%s | 去重后=%d | 返回=%d",
             roles, len(all_hits), len(results),
@@ -138,7 +159,14 @@ class Retriever:
             top_k=top_k,
             output_fields=_OUTPUT_FIELDS,
         )
-        return self._normalize_milvus_results(raw)
+        hits = self._normalize_milvus_results(raw)
+        if hits:
+            logger.debug(
+                "Dense 召回 top-%d (role=%s):\n%s",
+                min(5, len(hits)), role,
+                self._fmt_hits(hits[:5]),
+            )
+        return hits
 
     def _bm25_search(
         self, query: str, role: str, top_k: int
@@ -150,7 +178,14 @@ class Retriever:
             top_k=top_k,
             output_fields=_OUTPUT_FIELDS,
         )
-        return self._normalize_milvus_results(raw)
+        hits = self._normalize_milvus_results(raw)
+        if hits:
+            logger.debug(
+                "BM25 召回 top-%d (role=%s):\n%s",
+                min(5, len(hits)), role,
+                self._fmt_hits(hits[:5]),
+            )
+        return hits
 
     # ----------------------------------------------------------
     #  结果融合
@@ -187,6 +222,16 @@ class Retriever:
             results.append(entry)
 
         results.sort(key=lambda x: x["score"], reverse=True)
+        if results:
+            logger.debug(
+                "RRF 融合重排 top-%d (共 %d):\n%s",
+                min(5, len(results)), len(results),
+                "\n".join(
+                    f"  [{i+1}] score={r['score']:.6f} chunk={r['chunk_id']} "
+                    f"heading={r.get('heading_path', '')[:40]}"
+                    for i, r in enumerate(results[:5])
+                ),
+            )
         return results
 
     # ----------------------------------------------------------
@@ -232,9 +277,14 @@ class Retriever:
                     continue
                 seen_blocks.add(bid)
                 chunks = block_chunks[bid]
-                promoted_content = "\n\n".join(
-                    c.get("content", "") for c in chunks
-                )
+                heading = chunks[0].get("heading_path", "")
+                parts = []
+                for idx, c in enumerate(chunks):
+                    text = c.get("content", "")
+                    if idx > 0 and heading and text.startswith(heading):
+                        text = text[len(heading):].lstrip("\n")
+                    parts.append(text)
+                promoted_content = "\n\n".join(parts)
                 entry = dict(hit)
                 entry["content"] = promoted_content
                 entry["promoted"] = True
@@ -274,6 +324,20 @@ class Retriever:
     # ----------------------------------------------------------
     #  工具方法
     # ----------------------------------------------------------
+
+    @staticmethod
+    def _fmt_hits(hits: List[Dict], max_content: int = 50) -> str:
+        """格式化 hit 列表用于日志输出"""
+        lines = []
+        for i, h in enumerate(hits):
+            content_preview = h.get("content", "")[:max_content].replace("\n", " ")
+            lines.append(
+                f"  [{i+1}] dist={h.get('distance', 0):.4f} "
+                f"chunk={h.get('chunk_id', '')} "
+                f"heading={h.get('heading_path', '')[:40]} "
+                f"| {content_preview}"
+            )
+        return "\n".join(lines)
 
     @staticmethod
     def _normalize_milvus_results(raw: List[List[Dict]]) -> List[Dict]:

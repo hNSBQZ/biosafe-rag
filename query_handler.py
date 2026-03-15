@@ -166,6 +166,7 @@ def main():
         level=logging.INFO,
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     )
+    logging.getLogger("retriever").setLevel(logging.DEBUG)
 
     config = load_config()
 
@@ -204,6 +205,8 @@ def main():
         ("4", "新冠病毒是哪类病原体"),
         ("4", "小鼠常用的吸入麻醉剂是什么？"),
         ("4", "显示当前步骤"),
+        ("4", "消毒剂有哪些？"),
+        ("4", "培育黄热病毒时实验室温度应该设为多少？"),
     ]
 
     for exp_id, query in test_cases:
