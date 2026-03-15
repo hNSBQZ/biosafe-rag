@@ -286,6 +286,7 @@ class Retriever:
                     parts.append(text)
                 promoted_content = "\n\n".join(parts)
                 entry = dict(hit)
+                entry["original_content"] = hit["content"]
                 entry["content"] = promoted_content
                 entry["promoted"] = True
                 entry["chunk_count"] = len(chunks)
@@ -322,8 +323,65 @@ class Retriever:
         return groups
 
     # ----------------------------------------------------------
+    #  Token 预算裁剪 (Strategy C: 贪心填充 + 降级)
+    # ----------------------------------------------------------
+
+    def _apply_token_budget(self, results: List[Dict]) -> List[Dict]:
+        """按 token 预算贪心填充，放不下的升格 block 降级为原始 chunk。
+
+        从 RRF 分数最高的结果开始逐条填入：
+          - 放得下 → 整条放入
+          - 放不下且是升格 block → 降级为原始 chunk 再尝试
+          - 放不下且是普通 chunk → 跳过
+        """
+        budget = self._max_context_tokens
+        selected: List[Dict] = []
+        used = 0
+
+        for r in results:
+            tok = self._estimate_tokens(r.get("content", ""))
+            if used + tok <= budget:
+                selected.append(r)
+                used += tok
+                continue
+
+            if r.get("promoted") and r.get("original_content"):
+                demoted = dict(r)
+                demoted["content"] = r["original_content"]
+                demoted["promoted"] = False
+                demoted["demoted"] = True
+                del demoted["original_content"]
+                chunk_tok = self._estimate_tokens(demoted["content"])
+                if used + chunk_tok <= budget:
+                    selected.append(demoted)
+                    used += chunk_tok
+                    logger.debug(
+                        "预算降级: %s (%d→%d tok)",
+                        r["chunk_id"], tok, chunk_tok,
+                    )
+                else:
+                    logger.debug("预算不足，跳过: %s (%d tok)", r["chunk_id"], chunk_tok)
+            else:
+                logger.debug("预算不足，跳过: %s (%d tok)", r["chunk_id"], tok)
+
+        if len(selected) < len(results):
+            logger.info(
+                "Token 预算裁剪: %d→%d 条, 已用 %d/%d tok",
+                len(results), len(selected), used, budget,
+            )
+        return selected
+
+    # ----------------------------------------------------------
     #  工具方法
     # ----------------------------------------------------------
+
+    @staticmethod
+    def _estimate_tokens(text: str) -> int:
+        """粗略估算 token 数（与 split_chunk 保持一致）"""
+        cn = sum(1 for c in text if '\u4e00' <= c <= '\u9fff')
+        en = len(re.findall(r'[a-zA-Z]+', text))
+        num = len(re.findall(r'\d+', text))
+        return int(cn * 1.5 + en + num * 0.5) + 1
 
     @staticmethod
     def _fmt_hits(hits: List[Dict], max_content: int = 50) -> str:

@@ -3,10 +3,9 @@
 ================
 薄编排层，不含业务逻辑，只负责调用各模块并传递数据。
 
-当前链路：
+完整链路：
   FuncCall 检测 → LLM 第一轮（直答/槽位） → 槽位解析 → 名录查表 + Query 增强
-后续扩展：
-  → RAG 检索 → LLM 第二轮增强回答
+  → RAG 检索（Hybrid + 升格 + 预算裁剪） → LLM 第二轮增强回答
 """
 
 import logging
@@ -15,6 +14,7 @@ from typing import Dict, List, Optional
 from experiment_store import ExperimentStore
 from funcall_detector import detect_funcall
 from llm_client import LLMClient
+from rag_synthesizer import RAGSynthesizer
 from retriever import Retriever
 from slot_parser import LLMSlots, parse_llm_output, keyword_role_classify
 from catalog_manager import CatalogManager
@@ -31,11 +31,13 @@ class QueryHandler:
         experiment_store: ExperimentStore,
         catalog_manager: Optional[CatalogManager] = None,
         retriever: Optional[Retriever] = None,
+        synthesizer: Optional[RAGSynthesizer] = None,
     ):
         self._llm = llm_client
         self._experiments = experiment_store
         self._catalog = catalog_manager
         self._retriever = retriever
+        self._synthesizer = synthesizer
 
     def handle(
         self,
@@ -124,7 +126,6 @@ class QueryHandler:
         chunks = self._retriever.search(
             query=query,
             roles=slots.roles,
-            top_k=8,
             enhanced_query=search_query,
         )
         if not chunks:
@@ -138,18 +139,29 @@ class QueryHandler:
 
         logger.info("RAG 召回 %d 条 chunk", len(chunks))
 
-        # ── Step 7: (后续) LLM 第二轮增强回答 ──
-        # TODO: 将 chunks 拼为上下文，调 LLM 第二轮生成最终回答
-        rag_context = "\n\n---\n\n".join(c["content"] for c in chunks)
-        return {
-            "type": "rag",
-            "roles": slots.roles,
-            "search_query": search_query,
-            "rag_context": rag_context,
-            "sources": [c["chunk_id"] for c in chunks],
-            "raw_llm_output": llm_output,
-            "experiment_id": experiment_id,
-        }
+        # ── Step 7: LLM 第二轮增强回答 ──
+        if not self._synthesizer:
+            logger.warning("RAGSynthesizer 未配置，返回原始召回结果")
+            rag_context = "\n\n---\n\n".join(c["content"] for c in chunks)
+            return {
+                "type": "rag_raw",
+                "roles": slots.roles,
+                "search_query": search_query,
+                "rag_context": rag_context,
+                "sources": [c["chunk_id"] for c in chunks],
+                "raw_llm_output": llm_output,
+                "experiment_id": experiment_id,
+            }
+
+        result = self._synthesizer.synthesize(
+            query=query,
+            chunks=chunks,
+            experiment_id=experiment_id,
+            first_round_answer=slots.answer,
+        )
+        result["roles"] = slots.roles
+        result["search_query"] = search_query
+        return result
 
 
 # ------------------------------------------------------------------
@@ -179,12 +191,17 @@ def main():
     catalog = CatalogManager("table.json")
 
     retriever = None
+    synthesizer = None
     if "embedding" in config.llm_profiles:
         emb_client = LLMClient(config.llm_profiles["embedding"])
         milvus_mgr = MilvusManager(config.milvus)
         milvus_mgr.connect()
         retriever = Retriever(milvus_manager=milvus_mgr, embedding_client=emb_client)
-        print("Retriever 已初始化 (Hybrid: Dense + BM25)")
+        synthesizer = RAGSynthesizer(
+            llm_client=llm,
+            experiment_store=store,
+        )
+        print("Retriever + RAGSynthesizer 已初始化")
     else:
         print("警告: 未配置 embedding profile，跳过 RAG 检索")
 
@@ -198,14 +215,15 @@ def main():
         experiment_store=store,
         catalog_manager=catalog,
         retriever=retriever,
+        synthesizer=synthesizer,
     )
 
     # ── 测试用例 ──
     test_cases = [
-        ("4", "新冠病毒是哪类病原体"),
-        ("4", "小鼠常用的吸入麻醉剂是什么？"),
-        ("4", "显示当前步骤"),
-        ("4", "消毒剂有哪些？"),
+        # ("4", "新冠病毒是哪类病原体"),
+        # ("4", "小鼠常用的吸入麻醉剂是什么？"),
+        # ("4", "显示当前步骤"),
+        # ("4", "消毒剂有哪些？"),
         ("4", "培育黄热病毒时实验室温度应该设为多少？"),
     ]
 

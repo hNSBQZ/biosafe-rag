@@ -1,0 +1,106 @@
+2026-03-15 12:32:26,201 [INFO] experiment_store: 已加载实验: [1] Vero细胞培养新型冠状病毒 (10 步骤, 15 知识点)
+2026-03-15 12:32:26,202 [INFO] experiment_store: 已加载实验: [2] 高致病性禽流感病毒培养的标准操作程序 (6 步骤, 15 知识点)
+2026-03-15 12:32:26,202 [INFO] experiment_store: 已加载实验: [3] 小鼠的病毒接种 (4 步骤, 15 知识点)
+2026-03-15 12:32:26,202 [INFO] experiment_store: 已加载实验: [4] 小鼠麻醉 (4 步骤, 12 知识点)
+2026-03-15 12:32:26,203 [INFO] experiment_store: 已加载实验: [5] 小鼠取血标准操作程序 (6 步骤, 14 知识点)
+2026-03-15 12:32:26,203 [WARNING] experiment_store: 文件 experiments/数据清洗策略分析.md 中未找到 context 内容
+2026-03-15 12:32:26,203 [INFO] experiment_store: 共加载 5 个实验
+2026-03-15 12:32:26,208 [INFO] catalog_manager: 名录加载完成: 507 条记录
+2026-03-15 12:32:26,215 [INFO] milvus_manager: Milvus Lite 模式，数据库文件: ./milvus_lite.db
+/cache/hanqingzhe/miniconda3/envs/biosafe/lib/python3.12/site-packages/milvus_lite/__init__.py:15: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  from pkg_resources import DistributionNotFound, get_distribution
+2026-03-15 12:32:26,753 [INFO] milvus_manager: Milvus 连接已建立
+2026-03-15 12:32:26,753 [INFO] __main__: LLM 第一轮 | 实验=4 | query=培育黄热病毒时实验室温度应该设为多少？
+2026-03-15 12:32:29,269 [INFO] httpx: HTTP Request: POST http://111.203.204.166:9000/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-15 12:32:29,275 [INFO] __main__: LLM 第一轮完成 | 长度=85
+2026-03-15 12:32:29,275 [INFO] __main__: 槽位解析 | needs_rag=True roles=['regulation', 'knowledge'] pathogen=黄热病毒 activity=culture equipment=None hedging=False
+2026-03-15 12:32:29,276 [INFO] catalog_manager: 名录命中: '黄热病毒' → 黄热病毒 (第一类) | BSL=BSL-3
+2026-03-15 12:32:29,276 [INFO] __main__: 增强后检索 query: 黄热病毒 BSL-3 黄热病毒 培养 实验室温度 要求
+2026-03-15 12:32:29,750 [INFO] httpx: HTTP Request: POST https://dashscope.aliyuncs.com/compatible-mode/v1/embeddings "HTTP/1.1 200 OK"
+2026-03-15 12:32:29,857 [INFO] milvus_manager: 检索完成: 1 个查询, top_k=12, role=regulation
+2026-03-15 12:32:29,857 [DEBUG] retriever: Dense 召回 top-5 (role=regulation):
+  [1] dist=0.6506 chunk=通用安全.md_block200_chunk1 heading=6 实验室设施和设备要求 > 6．3 BSL-3 实验室 > 6．3．10 参数 | 6 实验室设施和设备要求 > 6．3 BSL-3 实验室 > 6．3．10 参数要求 6.3.10.
+  [2] dist=0.6209 chunk=通用安全.md_block205_chunk1 heading=6 实验室设施和设备要求 > 6.5 动物生物安全实验室 > 6.5.4 ABS | 6 实验室设施和设备要求 > 6.5 动物生物安全实验室 > 6.5.4 ABSL-4 实验室 6.
+  [3] dist=0.5922 chunk=通用安全.md_block204_chunk6 heading=6 实验室设施和设备要求 > 6.5 动物生物安全实验室 > 6.5.3 ABS | 6 实验室设施和设备要求 > 6.5 动物生物安全实验室 > 6.5.3 ABSL-3 实验室 6.
+  [4] dist=0.5780 chunk=通用安全.md_block201_chunk3 heading=6 实验室设施和设备要求 > 6．4 BSL-4 实验室 | 6 实验室设施和设备要求 > 6．4 BSL-4 实验室 6.4.7 如果安装传递窗，其结构承压力及
+  [5] dist=0.5749 chunk=通用安全.md_block203_chunk2 heading=6 实验室设施和设备要求 > 6.5 动物生物安全实验室 > 6.5.2 ABS | 6 实验室设施和设备要求 > 6.5 动物生物安全实验室 > 6.5.2 ABSL-2 实验室 6.
+2026-03-15 12:32:29,860 [INFO] milvus_manager: BM25 检索完成: 1 个查询, top_k=12, role=regulation
+2026-03-15 12:32:29,860 [DEBUG] retriever: BM25 召回 top-5 (role=regulation):
+  [1] dist=2.8133 chunk=通用安全.md_block193_chunk1 heading=6 实验室设施和设备要求 > 6．3 BSL-3 实验室 > 6．3．3 通风空 | 6 实验室设施和设备要求 > 6．3 BSL-3 实验室 > 6．3．3 通风空调系统 6.3.3.
+  [2] dist=2.6634 chunk=通用安全.md_block192_chunk0 heading=6 实验室设施和设备要求 > 6．3 BSL-3 实验室 > 6．3．2 围护结 | 6 实验室设施和设备要求 > 6．3 BSL-3 实验室 > 6．3．2 围护结构 # 6．3．2 
+  [3] dist=2.6208 chunk=通用安全.md_block195_chunk3 heading=6 实验室设施和设备要求 > 6．3 BSL-3 实验室 > 6．3．5 污物处 | 6 实验室设施和设备要求 > 6．3 BSL-3 实验室 > 6．3．5 污物处理及消毒灭菌系统 6
+  [4] dist=2.5991 chunk=通用安全.md_block200_chunk1 heading=6 实验室设施和设备要求 > 6．3 BSL-3 实验室 > 6．3．10 参数 | 6 实验室设施和设备要求 > 6．3 BSL-3 实验室 > 6．3．10 参数要求 6.3.10.
+  [5] dist=2.5571 chunk=通用安全.md_block192_chunk1 heading=6 实验室设施和设备要求 > 6．3 BSL-3 实验室 > 6．3．2 围护结 | 6 实验室设施和设备要求 > 6．3 BSL-3 实验室 > 6．3．2 围护结构 6.3.2.4 
+2026-03-15 12:32:29,860 [INFO] retriever: Role=regulation | dense=12 hits, bm25=12 hits
+2026-03-15 12:32:29,860 [DEBUG] retriever: RRF 融合重排 top-5 (共 23):
+  [1] score=0.015932 chunk=通用安全.md_block200_chunk1 heading=6 实验室设施和设备要求 > 6．3 BSL-3 实验室 > 6．3．10 参数
+  [2] score=0.009836 chunk=通用安全.md_block193_chunk1 heading=6 实验室设施和设备要求 > 6．3 BSL-3 实验室 > 6．3．3 通风空
+  [3] score=0.009677 chunk=通用安全.md_block192_chunk0 heading=6 实验室设施和设备要求 > 6．3 BSL-3 实验室 > 6．3．2 围护结
+  [4] score=0.009524 chunk=通用安全.md_block195_chunk3 heading=6 实验室设施和设备要求 > 6．3 BSL-3 实验室 > 6．3．5 污物处
+  [5] score=0.009231 chunk=通用安全.md_block192_chunk1 heading=6 实验室设施和设备要求 > 6．3 BSL-3 实验室 > 6．3．2 围护结
+2026-03-15 12:32:29,862 [INFO] milvus_manager: 检索完成: 1 个查询, top_k=12, role=knowledge
+2026-03-15 12:32:29,862 [DEBUG] retriever: Dense 召回 top-5 (role=knowledge):
+  [1] dist=0.5895 chunk=污染与废弃物管理.md_block166_chunk0 heading=灭活方法 > 4.1 标本灭活 > 4.1.2 载玻片的热灭活 | 灭活方法 > 4.1 标本灭活 > 4.1.2 载玻片的热灭活 # 4.1.2 载玻片的热灭活 在临
+  [2] dist=0.5151 chunk=污染与废弃物管理.md_block131_chunk0 heading=醇类 | 醇类 # 醇类 用于实验室消毒的醇类有乙醇(通常通过添加甲基化酒精而变性，因此不适合饮用)、丙醇(丙
+  [3] dist=0.5050 chunk=污染与废弃物管理.md_block168_chunk0 heading=灭活方法 > 4.1 标本灭活 > 4.1.4 电离辐射 | 灭活方法 > 4.1 标本灭活 > 4.1.4 电离辐射 # 4.1.4 电离辐射 电离辐射作为一种
+  [4] dist=0.4979 chunk=污染与废弃物管理.md_block161_chunk0 heading=废弃物运输 > 3.3 固体废弃物清除污染 > 3.3.3 碱性消化 | 废弃物运输 > 3.3 固体废弃物清除污染 > 3.3.3 碱性消化 # 3.3.3 碱性消化 碱消
+  [5] dist=0.4933 chunk=污染与废弃物管理.md_block165_chunk0 heading=灭活方法 > 4.1 标本灭活 > 4.1.1 核酸提取 | 灭活方法 > 4.1 标本灭活 > 4.1.1 核酸提取 # 4.1.1 核酸提取 当使用遗传技术时
+2026-03-15 12:32:29,863 [INFO] milvus_manager: BM25 检索完成: 1 个查询, top_k=12, role=knowledge
+2026-03-15 12:32:29,863 [DEBUG] retriever: BM25 召回 top-5 (role=knowledge):
+  [1] dist=2.2722 chunk=污染与废弃物管理.md_block162_chunk0 heading=废弃物运输 > 3.3 固体废弃物清除污染 > 3.3.4 炼制 | 废弃物运输 > 3.3 固体废弃物清除污染 > 3.3.4 炼制 # 3.3.4 炼制 炼制是另一种
+  [2] dist=2.2695 chunk=污染与废弃物管理.md_block161_chunk0 heading=废弃物运输 > 3.3 固体废弃物清除污染 > 3.3.3 碱性消化 | 废弃物运输 > 3.3 固体废弃物清除污染 > 3.3.3 碱性消化 # 3.3.3 碱性消化 碱消
+  [3] dist=2.1083 chunk=污染与废弃物管理.md_block160_chunk0 heading=废弃物运输 > 3.3 固体废弃物清除污染 > 3.3.2 焚化 | 废弃物运输 > 3.3 固体废弃物清除污染 > 3.3.2 焚化 # 3.3.2 焚化 焚化是一种消
+  [4] dist=1.9540 chunk=污染与废弃物管理.md_block124_chunk1 heading=酒精搓手 > 2.2 化学消毒 | 酒精搓手 > 2.2 化学消毒 # 2.2.1 消毒剂种类 有多种类型化学消毒剂可供选择(图2.3)
+  [5] dist=1.7822 chunk=污染与废弃物管理.md_block131_chunk2 heading=醇类 | 醇类 表2.3 影响化学消毒效果的因素  11 清除污染和废弃物管理
+2026-03-15 12:32:29,863 [INFO] retriever: Role=knowledge | dense=12 hits, bm25=12 hits
+2026-03-15 12:32:29,863 [DEBUG] retriever: RRF 融合重排 top-5 (共 22):
+  [1] score=0.015927 chunk=污染与废弃物管理.md_block161_chunk0 heading=废弃物运输 > 3.3 固体废弃物清除污染 > 3.3.3 碱性消化
+  [2] score=0.015321 chunk=污染与废弃物管理.md_block160_chunk0 heading=废弃物运输 > 3.3 固体废弃物清除污染 > 3.3.2 焚化
+  [3] score=0.009836 chunk=污染与废弃物管理.md_block162_chunk0 heading=废弃物运输 > 3.3 固体废弃物清除污染 > 3.3.4 炼制
+  [4] score=0.009375 chunk=污染与废弃物管理.md_block124_chunk1 heading=酒精搓手 > 2.2 化学消毒
+  [5] score=0.009231 chunk=污染与废弃物管理.md_block131_chunk2 heading=醇类
+2026-03-15 12:32:29,866 [INFO] retriever: Block 升格: 污染与废弃物管理.md_block131 (3 chunks, role=knowledge)
+2026-03-15 12:32:29,866 [INFO] retriever: Block 升格: 通用安全.md_block209 (2 chunks, role=regulation)
+2026-03-15 12:32:29,867 [DEBUG] retriever: 最终结果 (12 条):
+  [1] score=0.015932 chunk=通用安全.md_block200_chunk1 promoted=N ~164tok
+  [2] score=0.015927 chunk=污染与废弃物管理.md_block161_chunk0 promoted=N ~294tok
+  [3] score=0.015321 chunk=污染与废弃物管理.md_block160_chunk0 promoted=N ~549tok
+  [4] score=0.009836 chunk=通用安全.md_block193_chunk1 promoted=N ~177tok
+  [5] score=0.009836 chunk=污染与废弃物管理.md_block162_chunk0 promoted=N ~176tok
+  [6] score=0.009677 chunk=通用安全.md_block192_chunk0 promoted=N ~158tok
+  [7] score=0.009524 chunk=通用安全.md_block195_chunk3 promoted=N ~173tok
+  [8] score=0.009375 chunk=污染与废弃物管理.md_block124_chunk1 promoted=N ~59tok
+  [9] score=0.009231 chunk=通用安全.md_block192_chunk1 promoted=N ~176tok
+  [10] score=0.009231 chunk=污染与废弃物管理.md_block131_chunk2 promoted=Y (3chunks) ~919tok
+  [11] score=0.009091 chunk=通用安全.md_block209_chunk0 promoted=Y (2chunks) ~326tok
+  [12] score=0.009091 chunk=污染与废弃物管理.md_block132_chunk4 promoted=N ~170tok
+2026-03-15 12:32:29,867 [INFO] retriever: Hybrid 检索完成 | roles=['regulation', 'knowledge'] | 去重后=45 | 返回=12
+2026-03-15 12:32:29,867 [INFO] __main__: RAG 召回 12 条 chunk
+2026-03-15 12:32:29,867 [INFO] rag_synthesizer: RAG 合成 | chunks=12 | context_len=3617 chars
+2026-03-15 12:32:29,867 [INFO] rag_synthesizer: LLM 第二轮调用 | experiment=4
+2026-03-15 12:32:32,803 [INFO] httpx: HTTP Request: POST http://111.203.204.166:9000/v1/chat/completions "HTTP/1.1 200 OK"
+2026-03-15 12:32:32,804 [INFO] rag_synthesizer: LLM 第二轮完成 | answer_len=85
+Retriever + RAGSynthesizer 已初始化
+
+名录已加载: 507 条记录
+
+可用实验:
+  [1] Vero细胞培养新型冠状病毒
+  [2] 高致病性禽流感病毒培养的标准操作程序
+  [3] 小鼠的病毒接种
+  [4] 小鼠麻醉
+  [5] 小鼠取血标准操作程序
+
+────────────────────────────────────────────────────────────
+实验=4 | query=培育黄热病毒时实验室温度应该设为多少？
+────────────────────────────────────────────────────────────
+  type: rag
+  content: [NEED_RAG:regulation,directory]
+PATHOGEN:黄热病毒
+ACTIVITY:culture
+QUERY:黄热病毒 培养 实验室温度 要求
+  sources: ['通用安全.md_block200_chunk1', '污染与废弃物管理.md_block161_chunk0', '污染与废弃物管理.md_block160_chunk0', '通用安全.md_block193_chunk1', '污染与废弃物管理.md_block162_chunk0', '通用安全.md_block192_chunk0', '通用安全.md_block195_chunk3', '污染与废弃物管理.md_block124_chunk1', '通用安全.md_block192_chunk1', '污染与废弃物管理.md_block131_chunk0', '污染与废弃物管理.md_block131_chunk1', '污染与废弃物管理.md_block131_chunk2', '通用安全.md_block209_chunk0', '通用安全.md_block209_chunk1', '污染与废弃物管理.md_block132_chunk4']
+  experiment_id: 4
+  chunk_count: 12
+  roles: ['regulation', 'knowledge']
+  search_query: 黄热病毒 BSL-3 黄热病毒 培养 实验室温度 要求
